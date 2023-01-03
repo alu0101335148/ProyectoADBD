@@ -201,7 +201,7 @@ ADD CONSTRAINT HoraEntradaMenorHoraSalida CHECK (HoraEntrada < HoraSalida);
 El número de caja, cortadora y montacargas no puede ser negativo.
 
 ```sql
-ALTER TABLE Caja
+ALTER TABLE Cajero
 ADD CONSTRAINT CajaPositiva CHECK (Caja >= 0);
 
 ALTER TABLE Charcuteria
@@ -257,7 +257,7 @@ BEGIN
         FROM Trabaja 
         WHERE DNI_EMP = NEW.DNI_EMP AND 
         ID_TIE = NEW.ID_ALM AND 
-        FechaFin NOT NULL) = 0 THEN
+        FechaFin IS NOT NULL) = 0 THEN
       RAISE EXCEPTION 'El empleado no trabaja en la tienda';
     END IF;
     RETURN NEW;
