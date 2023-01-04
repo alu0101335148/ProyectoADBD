@@ -222,7 +222,8 @@ RETURNS TRIGGER AS $$
 BEGIN
     UPDATE Transaccion
     SET Importe = (SELECT SUM(Cantidad * Precio)
-                   FROM Transaccion JOIN Carrito USING (ID_COMP)
+                   FROM Transaccion JOIN Compra USING (ID_COMP)
+                   JOIN Carrito USING (ID_COMP)
                    JOIN Producto USING (ID_PROD))
     WHERE ID_TRANS = NEW.ID_TRANS;
     RETURN NEW;
