@@ -181,8 +181,7 @@ BEGIN
     IF (SELECT COUNT(*) 
         FROM Trabaja 
         WHERE DNI_EMP = NEW.DNI_SUPER AND 
-        ID_TIE = NEW.ID_ALM AND 
-        FechaFin IS NOT NULL) = 0 THEN
+        ID_TIE = NEW.ID_ALM) = 0 THEN
       RAISE EXCEPTION 'El empleado no trabaja en la tienda';
     END IF;
     RETURN NEW;
