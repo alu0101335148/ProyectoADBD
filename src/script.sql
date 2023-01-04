@@ -212,24 +212,25 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_descuento_trigger
-AFTER INSERT OR UPDATE ON Transaccion
+AFTER INSERT ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_descuento();
 
 CREATE OR REPLACE FUNCTION check_importe()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.Importe = (SELECT SUM(Cantidad * Precio)
+    UPDATE Transaccion
+    SET Importe = (SELECT SUM(Cantidad * Precio)
                    FROM Transaccion JOIN Compra USING (ID_COMP)
                    JOIN Carrito USING (ID_COMP)
                    JOIN Producto USING (ID_PROD)
-                   WHERE ID_TRANS = NEW.ID_TRANS
-                );
+                   WHERE ID_TRANS = NEW.ID_TRANS) 
+    WHERE ID_TRANS = NEW.ID_TRANS;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_importe_trigger
-BEFORE INSERT OR UPDATE ON Transaccion
+BEFORE INSERT ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_importe();
