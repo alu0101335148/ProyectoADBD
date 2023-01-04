@@ -24,17 +24,17 @@ INSERT INTO Producto VALUES (DEFAULT, 'Crema hidratante', 'Distribuidora Cream',
 INSERT INTO Producto VALUES (DEFAULT, 'Sábanas de algodón', 'Distribuidora Sheets', 'Comfy Bedding S.L.', 24.99, 'Sábanas suaves y cómodas de algodón 100%', 'Textil', NULL);
 INSERT INTO Producto VALUES (DEFAULT, 'Bolsa de deporte', 'Distribuidora Sport', 'Fit Gear S.A.', 29.99, 'Bolsa de deporte grande y resistente con compartimentos especializados', 'Otros', NULL);
 INSERT INTO Producto VALUES (DEFAULT, 'Juego de cuchillos de cocina', 'Distribuidora Knives', 'Sharp Blades S.L.', 89.99, 'Juego de cuchillos de cocina de acero inoxidable y mango ergonómico', 'Herramientas', '2023-12-01');
-INSERT INTO Producto VALUES (DEFAULT, 'Aceite de oliva', 'Distribuidora Olive', 'Olive Oil S.A.', 3.99, 'Aceite de oliva virgen extra de alta calidad', 'Alimentación', '2023-05-01');
+INSERT INTO Producto VALUES (DEFAULT, 'Aceite de oliva', 'Distribuidora Olive', 'Olive Oil S.A.', 3.99, 'Aceite de oliva virgen extra de alta calidad', 'Alimentacion', '2023-05-01');
 INSERT INTO Producto VALUES (DEFAULT, 'Limpiador multiusos', 'Distribuidora Cleaner', 'Fresh Home S.L.', 4.99, 'Limpiador multiusos eficaz para todas las superficies', 'Limpieza', NULL);
 INSERT INTO Producto VALUES (DEFAULT, 'Cepillo de dientes eléctrico', 'Distribuidora Brush', 'Clean Teeth Inc.', 49.99, 'Cepillo de dientes eléctrico con tecnología de limpieza avanzada', 'Higiene', NULL);
 INSERT INTO Producto VALUES (DEFAULT, 'Toallas de baño', 'Distribuidora Towels', 'Absorbent Towels S.A.', 9.99, 'Toallas de baño suaves y absorbentes', 'Textil', NULL);
 INSERT INTO Producto VALUES (DEFAULT, 'Llave inglesa', 'Distribuidora Wrench', 'Power Tools S.L.', 9.99, 'Llave inglesa resistente y de alta calidad', 'Herramientas', NULL);
 INSERT INTO Producto VALUES (DEFAULT, 'Regla metálica', 'Distribuidora Ruler', 'Precise Measures S.A.', 3.99, 'Regla metálica de precisión y durabilidad', 'Otros', NULL);
-INSERT INTO Producto VALUES (DEFAULT, 'Arroz integral', 'Distribuidora Rice', 'Healthy Grains S.L.', 2.99, 'Arroz integral 100% natural y sin gluten', 'Alimentación', '2023-09-01');
-INSERT INTO Producto VALUES (DEFAULT, 'Leche desnatada', 'Distribuidora Milk', 'Low Fat Dairy S.A.', 1.99, 'Leche desnatada de vaca de alta calidad y sin grasas añadidas', 'Alimentación', '2023-01-15');
-INSERT INTO Producto VALUES (DEFAULT, 'Jugo de naranja', 'Distribuidora Juice', 'Fresh Squeezed S.L.', 2.49, 'Jugo de naranja 100% natural y sin azúcares añadidos', 'Alimentación', '2023-04-01');
-INSERT INTO Producto VALUES (DEFAULT, 'Galletas integrales', 'Distribuidora Cookies', 'Whole Wheat S.A.', 3.99, 'Galletas integrales de avena y pasas de uva', 'Alimentación', '2023-02-01');
-INSERT INTO Producto VALUES (DEFAULT, 'Cereales integrales', 'Distribuidora Cereal', 'Whole Grains S.L.', 4.99, 'Cereales integrales con frutas y nueces', 'Alimentación', '2023-07-01');
+INSERT INTO Producto VALUES (DEFAULT, 'Arroz integral', 'Distribuidora Rice', 'Healthy Grains S.L.', 2.99, 'Arroz integral 100% natural y sin gluten', 'Alimentacion', '2023-09-01');
+INSERT INTO Producto VALUES (DEFAULT, 'Leche desnatada', 'Distribuidora Milk', 'Low Fat Dairy S.A.', 1.99, 'Leche desnatada de vaca de alta calidad y sin grasas añadidas', 'Alimentacion', '2023-01-15');
+INSERT INTO Producto VALUES (DEFAULT, 'Jugo de naranja', 'Distribuidora Juice', 'Fresh Squeezed S.L.', 2.49, 'Jugo de naranja 100% natural y sin azúcares añadidos', 'Alimentacion', '2023-04-01');
+INSERT INTO Producto VALUES (DEFAULT, 'Galletas integrales', 'Distribuidora Cookies', 'Whole Wheat S.A.', 3.99, 'Galletas integrales de avena y pasas de uva', 'Alimentacion', '2023-02-01');
+INSERT INTO Producto VALUES (DEFAULT, 'Cereales integrales', 'Distribuidora Cereal', 'Whole Grains S.L.', 4.99, 'Cereales integrales con frutas y nueces', 'Alimentacion', '2023-07-01');
 
 
 -- Insertar datos para los empleados
@@ -110,6 +110,29 @@ INSERT INTO Tienda VALUES ('T008', 'Calle del Bosque', 'Mallorca', 'Islas Balear
 INSERT INTO Tienda VALUES ('T009', 'Calle de la Pradera', 'Granada', 'Andalucía', 400);
 INSERT INTO Tienda VALUES ('T010', 'Calle del Desierto', 'Tenerife', 'Islas Canarias', 350);
 
+-- Insertar datos para la tabla trabaja
+-- CREATE TABLE Trabaja(
+--     DNI_EMP VARCHAR(9),
+--     ID_TIE VARCHAR(30),
+--     FechaInicio DATE,
+--     FechaFin DATE,
+--     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE CASCADE,
+--     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE CASCADE,
+--     PRIMARY KEY (DNI_EMP, ID_TIE, FechaInicio)
+-- );
+INSERT INTO Trabaja VALUES ('12345678A', 'T001', '2020-01-01', '2020-06-30');
+INSERT INTO Trabaja VALUES ('12345679B', 'T002', '2020-02-01', '2020-07-31');
+INSERT INTO Trabaja VALUES ('12345680C', 'T003', '2020-03-01', NULL);
+INSERT INTO Trabaja VALUES ('12345681D', 'T004', '2020-04-01', '2020-09-30');
+INSERT INTO Trabaja VALUES ('12345682E', 'T005', '2020-05-01', '2020-10-31');
+INSERT INTO Trabaja VALUES ('12345683F', 'T006', '2020-06-01', '2020-11-30');
+INSERT INTO Trabaja VALUES ('12345684G', 'T007', '2020-07-01', '2020-12-31');
+INSERT INTO Trabaja VALUES ('12345685H', 'T008', '2020-08-01', '2021-01-31');
+INSERT INTO Trabaja VALUES ('12345686I', 'T009', '2020-09-01', '2020-10-01');
+INSERT INTO Trabaja VALUES ('12345686I', 'T009', '2020-10-01', NULL);
+INSERT INTO Trabaja VALUES ('12345687J', 'T010', '2020-10-01', '2021-03-31');
+INSERT INTO Trabaja VALUES ('12345687J', 'T010', '2021-04-29', NULL);
+
 -- Insertar datos para los almacenes
 -- CREATE TABLE Almacen(
 --     ID_ALM VARCHAR(30) PRIMARY KEY,
@@ -158,29 +181,6 @@ INSERT INTO DisponibilidadTienda VALUES
 ('T009', 1, 2),
 ('T009', 5, 5),
 ('T010', 3, 8);
-
--- Insertar datos para la tabla trabaja
--- CREATE TABLE Trabaja(
---     DNI_EMP VARCHAR(9),
---     ID_TIE VARCHAR(30),
---     FechaInicio DATE,
---     FechaFin DATE,
---     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE CASCADE,
---     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE CASCADE,
---     PRIMARY KEY (DNI_EMP, ID_TIE, FechaInicio)
--- );
-INSERT INTO Trabaja VALUES ('12345678A', 'T001', '2020-01-01', '2020-06-30');
-INSERT INTO Trabaja VALUES ('12345679B', 'T002', '2020-02-01', '2020-07-31');
-INSERT INTO Trabaja VALUES ('12345680C', 'T003', '2020-03-01', NULL);
-INSERT INTO Trabaja VALUES ('12345681D', 'T004', '2020-04-01', '2020-09-30');
-INSERT INTO Trabaja VALUES ('12345682E', 'T005', '2020-05-01', '2020-10-31');
-INSERT INTO Trabaja VALUES ('12345683F', 'T006', '2020-06-01', '2020-11-30');
-INSERT INTO Trabaja VALUES ('12345684G', 'T007', '2020-07-01', '2020-12-31');
-INSERT INTO Trabaja VALUES ('12345685H', 'T008', '2020-08-01', '2021-01-31');
-INSERT INTO Trabaja VALUES ('12345686I', 'T009', '2020-09-01', '2020-10-01');
-INSERT INTO Trabaja VALUES ('12345686I', 'T009', '2020-10-01', NULL);
-INSERT INTO Trabaja VALUES ('12345687J', 'T010', '2020-10-01', '2021-03-31');
-INSERT INTO Trabaja VALUES ('12345687J', 'T010', '2021-04-31', NULL);
 
 -- Insertar datos para la tabla DisponibilidadAlmacen
 -- CREATE TABLE DisponibilidadAlmacen(

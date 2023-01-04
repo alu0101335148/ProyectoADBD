@@ -182,7 +182,7 @@ BEGIN
         FROM Trabaja 
         WHERE DNI_EMP = NEW.DNI_SUPER AND 
         ID_TIE = NEW.ID_ALM) = 0 THEN
-      RAISE EXCEPTION 'El empleado no trabaja en la tienda';
+      RAISE EXCEPTION 'El empleado ' + NEW.DNI_SUPER + ' no trabaja en la tienda ' + NEW.ID_ALM;
     END IF;
     RETURN NEW;
 END;
