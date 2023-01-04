@@ -106,25 +106,26 @@ CREATE TABLE DisponibilidadAlmacen(
     PRIMARY KEY (ID_ALM, ID_PROD)
 );
 
+CREATE TABLE Compra(
+    ID_COMP INT,
+    ID_PROD INT,
+    Cantidad INT NOT NULL,
+    FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
+    PRIMARY KEY (ID_COMP, ID_PROD)
+);
+
 CREATE TABLE Transaccion(
     ID_TRANS SERIAL PRIMARY KEY,
     Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     DNI_CLI VARCHAR(9),
     DNI_EMP VARCHAR(9),
     ID_TIE VARCHAR(30),
+    ID_COMP INT NOT NULL,
     Importe FLOAT NOT NULL,
     FOREIGN KEY (DNI_CLI) REFERENCES Cliente(DNI_CLI) ON DELETE SET NULL,
     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE SET NULL,
     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE SET NULL
-);
-
-CREATE TABLE Compra(
-    ID_PED INT,
-    ID_PROD INT,
-    Cantidad INT NOT NULL,
-    FOREIGN KEY (ID_PED) REFERENCES Transaccion(ID_TRANS) ON DELETE CASCADE,
-    FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
-    PRIMARY KEY (ID_PED, ID_PROD)
+    FOREIGN KEY (ID_COMP) REFERENCES Compra(ID_COMP) ON DELETE CASCADE,
 );
 
 ALTER TABLE Producto
@@ -132,6 +133,9 @@ ADD CONSTRAINT PrecioPositivo CHECK (Precio >= 0);
 
 ALTER TABLE Transaccion
 ADD CONSTRAINT ImportePositivo CHECK (Importe >= 0);
+
+ALTER TABLE Compra
+ADD CONSTRAINT CantidadPositiva CHECK (Cantidad > 0);
 
 ALTER TABLE Cliente
 ADD CONSTRAINT DescuentoPositivo CHECK (Descuento >= 0 AND Descuento <= 25);
@@ -186,7 +190,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER check_supervisa
+CREATE TRIGGER check_supervisa_trigger
 BEFORE INSERT OR UPDATE ON Almacen
 FOR EACH ROW
 EXECUTE PROCEDURE check_supervisa();
@@ -203,7 +207,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER check_descuento
+CREATE TRIGGER check_descuento_trigger
 AFTER INSERT OR UPDATE ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_descuento();
@@ -213,14 +217,14 @@ RETURNS TRIGGER AS $$
 BEGIN
     UPDATE Transaccion
     SET Importe = (SELECT SUM(Cantidad * Precio)
-                   FROM Compra JOIN Producto USING (ID_PROD)
-                   WHERE ID_PED = NEW.ID_PED)
-    WHERE ID_TRANS = NEW.ID_TRANS AND DNI_CLI = NEW.DNI_CLI;
+                   FROM Transaccion JOIN Compra USING (ID_COMP)
+                   JOIN Producto USING (ID_PROD))
+    WHERE ID_TRANS = NEW.ID_TRANS;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER check_importe
+CREATE TRIGGER check_importe_trigger
 AFTER INSERT OR UPDATE ON Compra
 FOR EACH ROW
 EXECUTE PROCEDURE check_importe();
