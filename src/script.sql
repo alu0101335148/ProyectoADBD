@@ -116,7 +116,7 @@ CREATE TABLE Transaccion(
     DNI_EMP VARCHAR(9),
     ID_TIE VARCHAR(30),
     ID_COMP INT NOT NULL,
-    Importe FLOAT NOT NULL,
+    Importe FLOAT,
     Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (DNI_CLI) REFERENCES Cliente(DNI_CLI) ON DELETE SET NULL,
     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE SET NULL,
@@ -128,7 +128,6 @@ CREATE TABLE Carrito(
     ID_COMP INT,
     ID_PROD INT,
     Cantidad INT NOT NULL,
-    FOREIGN KEY (ID_PED) REFERENCES Transaccion(ID_TRANS) ON DELETE CASCADE,
     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
     FOREIGN KEY (ID_COMP) REFERENCES Compra(ID_COMP) ON DELETE CASCADE,
     PRIMARY KEY (ID_COMP, ID_PROD)
@@ -220,17 +219,17 @@ EXECUTE PROCEDURE check_descuento();
 CREATE OR REPLACE FUNCTION check_importe()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE Transaccion
-    SET Importe = (SELECT SUM(Cantidad * Precio)
+    NEW.Importe = (SELECT SUM(Cantidad * Precio)
                    FROM Transaccion JOIN Compra USING (ID_COMP)
                    JOIN Carrito USING (ID_COMP)
-                   JOIN Producto USING (ID_PROD))
-    WHERE ID_TRANS = NEW.ID_TRANS;
+                   JOIN Producto USING (ID_PROD)
+                   WHERE ID_TRANS = NEW.ID_TRANS
+                );
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_importe_trigger
-AFTER INSERT OR UPDATE ON Carrito
+BEFORE INSERT OR UPDATE ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_importe();
