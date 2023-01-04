@@ -110,27 +110,6 @@ INSERT INTO Tienda VALUES ('T008', 'Calle del Bosque', 'Mallorca', 'Islas Balear
 INSERT INTO Tienda VALUES ('T009', 'Calle de la Pradera', 'Granada', 'Andalucía', 400);
 INSERT INTO Tienda VALUES ('T010', 'Calle del Desierto', 'Tenerife', 'Islas Canarias', 350);
 
-INSERT INTO DisponibilidadTienda (ID_TIE, ID_PROD, Cantidad) VALUES
-('T001', 1, 7),
-('T001', 2, 8),
-('T002', 3, 9),
-('T002', 4, 10),
-('T002', 5, 6),
-('T003', 2, 5),
-('T004', 1, 3),
-('T004', 3, 2),
-('T004', 5, 8),
-('T005', 4, 1),
-('T006', 2, 9),
-('T007', 1, 7),
-('T007', 3, 4),
-('T008', 2, 6),
-('T008', 4, 3),
-('T009', 1, 2),
-('T009', 5, 5),
-('T010', 3, 8);
-
-
 -- Insertar datos para los almacenes
 -- CREATE TABLE Almacen(
 --     ID_ALM VARCHAR(30) PRIMARY KEY,
@@ -150,6 +129,35 @@ INSERT INTO Almacen VALUES ('A007', 22, 700, '12345684G');
 INSERT INTO Almacen VALUES ('A008', 24, 1200, '12345685H');
 INSERT INTO Almacen VALUES ('A009', 18, 1000, '12345686I');
 INSERT INTO Almacen VALUES ('A010', 20, 1200, '12345687J');
+
+-- Insertar datos para la tabla DisponibilidadTienda
+-- CREATE TABLE DisponibilidadTienda(
+--     ID_TIE VARCHAR(30),
+--     ID_PROD INT,
+--     Cantidad INT NOT NULL,
+--     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE CASCADE,
+--     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
+--     PRIMARY KEY (ID_TIE, ID_PROD)
+-- );
+INSERT INTO DisponibilidadTienda VALUES
+('T001', 1, 7),
+('T001', 2, 8),
+('T002', 3, 9),
+('T002', 4, 10),
+('T002', 5, 6),
+('T003', 2, 5),
+('T004', 1, 3),
+('T004', 3, 2),
+('T004', 5, 8),
+('T005', 4, 1),
+('T006', 2, 9),
+('T007', 1, 7),
+('T007', 3, 4),
+('T008', 2, 6),
+('T008', 4, 3),
+('T009', 1, 2),
+('T009', 5, 5),
+('T010', 3, 8);
 
 -- Insertar datos para la tabla trabaja
 -- CREATE TABLE Trabaja(
@@ -172,17 +180,6 @@ INSERT INTO Trabaja VALUES ('12345685H', 'T008', '2020-08-01', '2021-01-31');
 INSERT INTO Trabaja VALUES ('12345686I', 'T009', '2020-09-01', '2021-02-28');
 INSERT INTO Trabaja VALUES ('12345687J', 'T010', '2020-10-01', '2021-03-31');
 
--- Insertar datos para la tabla DisponibilidadTienda
--- CREATE TABLE DisponibilidadTienda(
---     ID_TIE VARCHAR(30),
---     ID_PROD INT,
---     Cantidad INT NOT NULL,
---     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE CASCADE,
---     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
---     PRIMARY KEY (ID_TIE, ID_PROD)
--- );
-
-
 -- Insertar datos para la tabla DisponibilidadAlmacen
 -- CREATE TABLE DisponibilidadAlmacen(
 --     ID_ALM VARCHAR(30),
@@ -192,35 +189,16 @@ INSERT INTO Trabaja VALUES ('12345687J', 'T010', '2020-10-01', '2021-03-31');
 --     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
 --     PRIMARY KEY (ID_ALM, ID_PROD)
 -- );
-INSERT INTO DisponibilidadAlmacen VALUES ('001', 1, 1000);
-INSERT INTO DisponibilidadAlmacen VALUES ('001', 2, 2000);
-INSERT INTO DisponibilidadAlmacen VALUES ('002', 3, 3000);
-INSERT INTO DisponibilidadAlmacen VALUES ('002', 4, 4000);
-INSERT INTO DisponibilidadAlmacen VALUES ('003', 5, 5000);
-INSERT INTO DisponibilidadAlmacen VALUES ('003', 6, 6000);
-INSERT INTO DisponibilidadAlmacen VALUES ('004', 7, 7000);
-INSERT INTO DisponibilidadAlmacen VALUES ('004', 8, 8000);
-INSERT INTO DisponibilidadAlmacen VALUES ('005', 9, 9000);
-INSERT INTO DisponibilidadAlmacen VALUES ('005', 10, 10000);
-
--- Insertar datos para la tabla Compra
--- CREATE TABLE Compra(
---     ID_COMP INT,
---     ID_PROD INT,
---     Cantidad INT NOT NULL,
---     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
---     PRIMARY KEY (ID_COMP, ID_PROD)
--- );
-INSERT INTO Compra VALUES (6, 11, 110);
-INSERT INTO Compra VALUES (6, 12, 120);
-INSERT INTO Compra VALUES (7, 13, 130);
-INSERT INTO Compra VALUES (7, 14, 140);
-INSERT INTO Compra VALUES (8, 15, 150);
-INSERT INTO Compra VALUES (8, 16, 160);
-INSERT INTO Compra VALUES (9, 17, 170);
-INSERT INTO Compra VALUES (9, 18, 180);
-INSERT INTO Compra VALUES (10, 19, 190);
-INSERT INTO Compra VALUES (10, 20, 200);
+INSERT INTO DisponibilidadAlmacen VALUES ('A001', 1, 1000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A001', 2, 2000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A002', 3, 3000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A002', 4, 4000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A003', 5, 5000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A003', 6, 6000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A004', 7, 7000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A004', 8, 8000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A005', 9, 9000);
+INSERT INTO DisponibilidadAlmacen VALUES ('A005', 10, 10000);
 
 -- Insertar datos para la tabla Transaccion
 -- CREATE TABLE Transaccion(
@@ -244,3 +222,22 @@ INSERT INTO Transaccion VALUES ('12345684G', '12345685H', '006', 10, 600);
 INSERT INTO Transaccion VALUES ('12345685H', '12345686I', '007', 6, 700);
 INSERT INTO Transaccion VALUES ('12345686I', '12345687J', '008', 7, 800);
 INSERT INTO Transaccion VALUES ('12345687J', '12345678A', '009', 8, 900);
+
+-- Insertar datos para la tabla Compra
+-- CREATE TABLE Compra(
+--     ID_COMP INT,
+--     ID_PROD INT,
+--     Cantidad INT NOT NULL,
+--     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
+--     PRIMARY KEY (ID_COMP, ID_PROD)
+-- );
+INSERT INTO Compra VALUES (6, 11, 110);
+INSERT INTO Compra VALUES (6, 12, 120);
+INSERT INTO Compra VALUES (7, 13, 130);
+INSERT INTO Compra VALUES (7, 14, 140);
+INSERT INTO Compra VALUES (8, 15, 150);
+INSERT INTO Compra VALUES (8, 16, 160);
+INSERT INTO Compra VALUES (9, 17, 170);
+INSERT INTO Compra VALUES (9, 18, 180);
+INSERT INTO Compra VALUES (10, 19, 190);
+INSERT INTO Compra VALUES (10, 20, 200);
