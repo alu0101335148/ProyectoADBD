@@ -199,14 +199,17 @@ BEFORE INSERT OR UPDATE ON Almacen
 FOR EACH ROW
 EXECUTE PROCEDURE check_supervisa();
 
--- Aplica un descuento de 10 a los clientet
+-- Aplica un descuento de 10 a los clientes que el último mes hayan gastado más de 100 euros.
 CREATE OR REPLACE FUNCTION check_descuento()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF (SELECT SUM(Importe)
+    IF (SELECT SUM(Importe) 
         FROM Transaccion
-        WHERE DNI_CLI = NEW.DNI_CLI) >= 100 THEN
-      UPDATE Cliente SET Descuento = 10 WHERE DNI_CLI = NEW.DNI_CLI;
+        WHERE DNI_CLI = NEW.DNI_CLI AND
+        Fecha > (SELECT CURRENT_TIMESTAMP - INTERVAL '1 month')) > 100 THEN
+      UPDATE Cliente
+      SET Descuento = 10
+      WHERE DNI_CLI = NEW.DNI_CLI;
     END IF;
     RETURN NEW;
 END;
@@ -217,34 +220,48 @@ AFTER UPDATE ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_descuento();
 
+-- Calcula el importe en base a la lista de productos que se han comprado. 
+-- Nota: en caso de que tenga descuento lo aplica y lo pone a 0.
 CREATE OR REPLACE FUNCTION check_importe()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE Transaccion
-    SET Importe = (SELECT SUM(Cantidad * Precio)
-                   FROM Transaccion JOIN Compra USING (ID_COMP)
-                   JOIN Carrito USING (ID_COMP)
-                   JOIN Producto USING (ID_PROD)
-                   WHERE ID_COMP = NEW.ID_COMP)
-    WHERE ID_TRANS = NEW.ID_TRANS;
+    -- Calcula el importe de la compra
+    SELECT SUM(p.Precio * c.Cantidad) INTO NEW.importe
+    FROM Carrito c
+    INNER JOIN Producto p ON c.ID_PROD = p.ID_PROD
+    WHERE c.ID_COMP = NEW.ID_COMP;
+
+    -- En caso de que la compra sea superior a 50€ y tenga descuento lo aplica
+    IF NEW.Importe > 50 AND NEW.DNI_CLI IN (SELECT DNI_CLI FROM Cliente WHERE Descuento > 0) THEN
+        NEW.Importe = NEW.importe - (SELECT Descuento FROM Cliente WHERE DNI_CLI = NEW.DNI_CLI);
+        -- Pone a 0 el descuento
+        UPDATE Cliente
+        SET Descuento = 0
+        WHERE DNI_CLI = NEW.DNI_CLI;
+    END IF;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_importe_trigger
-AFTER INSERT ON Transaccion
+BEFORE INSERT ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_importe();
 
--- Revisar que en una transacción no se pueda comprar un producto que no esté en la tienda
+-- Revisar que en una transacción no se pueda comprar un producto del carrito que no esté en la tienda
+-- de igual forma que haya stock suficiente.
 CREATE OR REPLACE FUNCTION check_producto()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF (SELECT COUNT(*) 
-        FROM DisponibilidadTienda 
-        WHERE ID_TIE = NEW.ID_TIE AND 
-        ID_PROD = NEW.ID_PROD) = 0 THEN
-      RAISE EXCEPTION 'El producto % no está en la tienda %', NEW.ID_PROD, NEW.ID_TIE;
+    IF EXISTS (
+        SELECT * FROM Carrito c JOIN Producto p USING (ID_PROD) 
+            WHERE c.ID_COMP = NEW.ID_COMP AND EXISTS (
+                SELECT * FROM DisponibilidadTienda 
+                WHERE ID_PROD = p.ID_PROD AND ID_TIE = NEW.ID_TIE AND Cantidad < c.Cantidad
+            )
+    ) THEN
+      RAISE EXCEPTION 'No hay stock suficiente de alguno de los productos de la compra %', NEW.ID_COMP;
     END IF;
     RETURN NEW;
 END;
@@ -267,8 +284,28 @@ BEGIN
     END IF;
     RETURN NEW;
 END;
+$$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_cajero_trigger
 BEFORE INSERT OR UPDATE ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_cajero();
+
+-- Eliminar el stock una vez se ha hecho la transaccion
+CREATE OR REPLACE FUNCTION update_stock()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE DisponibilidadTienda
+    SET Cantidad = Cantidad - c.Cantidad
+    FROM Carrito c
+    WHERE c.ID_COMP = NEW.ID_COMP AND 
+          DisponibilidadTienda.ID_PROD = c.ID_PROD AND 
+          DisponibilidadTienda.ID_TIE = NEW.ID_TIE;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_stock_trigger
+AFTER INSERT ON Transaccion
+FOR EACH ROW
+EXECUTE PROCEDURE update_stock();

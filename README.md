@@ -152,7 +152,7 @@ Foreing Key (ID_PROD) references Producto(ID_PROD)
 
 - Un empleado de logística puede supervisar un almacén, siempre y cuando haya trabajado en esa tienda alguna vez.
 
-- El descuento de 10$ se aplica para clientes cuyo gasto total supere 100$.
+- El descuento de 10$ se aplica para clientes cuyo gasto total supere 100$, en este último mes.
 
 - El importe de una transacción, se calcula en base al precio y la cantidad de los productos de la cesta.
 
