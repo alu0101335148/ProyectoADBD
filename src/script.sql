@@ -184,7 +184,8 @@ ADD CONSTRAINT SuperficiePositiva CHECK (Superficie > 0);
 CREATE OR REPLACE FUNCTION check_supervisa()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF (SELECT COUNT(*) 
+    IF NEW.ID_SUPER IS NOT NULL AND
+       (SELECT COUNT(*) 
         FROM Trabaja JOIN Logistica USING (DNI_EMP)
         WHERE DNI_EMP = NEW.DNI_SUPER AND 
         ID_TIE = NEW.ID_ALM) = 0 THEN
@@ -295,8 +296,8 @@ EXECUTE PROCEDURE check_cajero();
 CREATE OR REPLACE FUNCTION update_stock()
 RETURNS TRIGGER AS $$
 BEGIN
-    UPDATE DisponibilidadTienda
-    SET Cantidad = Cantidad - c.Cantidad
+    UPDATE DisponibilidadTienda d
+    SET d.Cantidad = d.Cantidad - c.Cantidad
     FROM Carrito c
     WHERE c.ID_COMP = NEW.ID_COMP AND 
           DisponibilidadTienda.ID_PROD = c.ID_PROD AND 
