@@ -184,7 +184,7 @@ ADD CONSTRAINT SuperficiePositiva CHECK (Superficie > 0);
 CREATE OR REPLACE FUNCTION check_supervisa()
 RETURNS TRIGGER AS $$
 BEGIN
-    IF NEW.ID_SUPER IS NOT NULL AND
+    IF NEW.DNI_SUPER IS NOT NULL AND
        (SELECT COUNT(*) 
         FROM Trabaja JOIN Logistica USING (DNI_EMP)
         WHERE DNI_EMP = NEW.DNI_SUPER AND 
@@ -251,25 +251,28 @@ FOR EACH ROW
 EXECUTE PROCEDURE check_importe();
 
 -- Revisar que en una transacción no se pueda comprar un producto del carrito que no esté en la tienda
--- de igual forma que haya stock suficiente.
+-- de igual forma que haya stock suficiente. Que no haya stock de un producto en una tienda puede ser
+-- porque la cantidad es 0, o bien no existe esa fila en la tabla.
 CREATE OR REPLACE FUNCTION check_producto()
 RETURNS TRIGGER AS $$
 BEGIN
     IF EXISTS (
-        SELECT * FROM Carrito c JOIN Producto p USING (ID_PROD) 
-            WHERE c.ID_COMP = NEW.ID_COMP AND EXISTS (
-                SELECT * FROM DisponibilidadTienda 
-                WHERE ID_PROD = p.ID_PROD AND ID_TIE = NEW.ID_TIE AND Cantidad < c.Cantidad
-            )
+        SELECT *
+        FROM Carrito c
+        WHERE c.ID_COMP = NEW.ID_COMP AND (NEW.ID_TIE, ID_PROD) NOT IN (SELECT ID_TIE, ID_PROD FROM DisponibilidadTienda)
+    ) OR EXISTS (
+        SELECT *
+        FROM Carrito c JOIN DisponibilidadTienda d USING (ID_PROD)
+        WHERE c.ID_COMP = NEW.ID_COMP AND d.ID_TIE = new.ID_TIE AND d.Cantidad < c.Cantidad               
     ) THEN
-      RAISE EXCEPTION 'No hay stock suficiente de alguno de los productos de la compra %', NEW.ID_COMP;
+        RAISE EXCEPTION 'No hay stock suficiente de alguno de los productos de la compra %', NEW.ID_COMP;
     END IF;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_producto_trigger
-BEFORE INSERT OR UPDATE ON Transaccion
+BEFORE INSERT ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_producto();
 
@@ -297,11 +300,11 @@ CREATE OR REPLACE FUNCTION update_stock()
 RETURNS TRIGGER AS $$
 BEGIN
     UPDATE DisponibilidadTienda d
-    SET d.Cantidad = d.Cantidad - c.Cantidad
+    SET Cantidad = Cantidad - c.Cantidad
     FROM Carrito c
-    WHERE c.ID_COMP = NEW.ID_COMP AND 
-          DisponibilidadTienda.ID_PROD = c.ID_PROD AND 
-          DisponibilidadTienda.ID_TIE = NEW.ID_TIE;
+    WHERE c.ID_COMP = NEW.ID_COMP AND
+          c.ID_PROD = d.ID_PROD AND
+          d.ID_TIE = NEW.ID_TIE;
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;

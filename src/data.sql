@@ -151,7 +151,7 @@ INSERT INTO Trabaja VALUES
 --     FOREIGN KEY (ID_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE SET NULL
 -- );
 INSERT INTO Almacen VALUES
-('T001', 18, 500, NULL);
+('T001', 18, 500, NULL),
 ('T002', 20, 700, NULL),
 ('T003', 22, 400, '12345680C'),
 ('T004', 24, 1000, NULL),
@@ -213,9 +213,10 @@ INSERT INTO DisponibilidadAlmacen VALUES
 ('T005', 10, 100);
 
 -- Insertar datos para la tabla Compra
-INSERT INTO Compra VALUES (DEFAULT);
-INSERT INTO Compra VALUES (DEFAULT);
-INSERT INTO Compra VALUES (DEFAULT);
+INSERT INTO Compra VALUES 
+(DEFAULT),
+(DEFAULT),
+(DEFAULT);
 
 -- Insertar datos para la tabla Carrito
 -- CREATE TABLE Carrito(
@@ -226,16 +227,11 @@ INSERT INTO Compra VALUES (DEFAULT);
 --     PRIMARY KEY (ID_COMP, ID_PROD)
 -- );
 INSERT INTO Carrito VALUES
-(1, 1, 1),
+(1, 1, 3),
 (1, 2, 2),
-(1, 3, 3),
-(1, 4, 4),
-(2, 5, 15),
-(2, 6, 10),
-(2, 2, 7),
-(3, 8, 8),
-(3, 9, 1),
-(3, 1, 2);
+(2, 2, 1),
+(3, 3, 2);
+(3, 1, 1);
 
 -- Insertar datos para la tabla Transaccion
 -- CREATE TABLE Transaccion(
@@ -254,4 +250,4 @@ INSERT INTO Carrito VALUES
 INSERT INTO Transaccion VALUES 
 (DEFAULT, '12345678A', '12345678A', 'T001', 1),
 (DEFAULT, '87654321B', '12345678A', 'T001', 2),
-(DEFAULT, '11111111C', '12345678A', 'T001', 3);
+(DEFAULT, '11111111C', '12345684G', 'T007', 3);
