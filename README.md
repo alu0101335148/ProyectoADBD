@@ -146,13 +146,13 @@ Foreing Key (ID_PROD) references Producto(ID_PROD)
 
 - La fecha de finalización debe ser posterior a la facha de inicio en un periodo laboral.
 
-- El salario mínimo en la compañía es 900$.
+- El salario mínimo en la compañía es 900€.
 
 - Sólo puede haber un almacén por cada tienda.
 
 - Un empleado de logística puede supervisar un almacén, siempre y cuando haya trabajado en esa tienda alguna vez.
 
-- El descuento de 10$ se aplica para clientes cuyo gasto total supere 100$, en este último mes.
+- El descuento de 10€ se aplica para clientes cuyo gasto total supere 100€, en este último mes.
 
 - El importe de una transacción, se calcula en base al precio y la cantidad de los productos de la cesta.
 
@@ -171,10 +171,42 @@ GROUP BY ID_TIE
 ORDER BY valor DESC;
 ```
 
-Cambiar el supervisor de la tienda 'T001'.
+Añadimos 2 unidades del producto 4 y 1 unidad del producto 2 a la tienda T007.
 ```sql
--- Se espera un error.
-UPDATE Almacen
-SET ID_SUPER = '12345682E'
-WHERE ID_ALM = 'T001';
+INSERT INTO DisponibilidadTienda VALUES
+('T007', 4, 2),
+('T007', 2, 1);
+```
+
+Hacemos una compra (productos 2 y 4) superior a 100€.
+```sql
+INSERT INTO Compra VALUES (2000);
+
+INSERT INTO Carrito VALUES
+(2000, 4, 1),
+(2000, 2, 1);
+
+INSERT INTO Transaccion
+VALUES (DEFAULT, '55555555G', '12345684G', 'T007', 2000);
+```
+
+El cliente ya dispone de un descuento de 10€.
+```sql
+SELECT Descuento FROM Cliente WHERE DNI_CLI = '55555555G';
+```
+
+```sql
+SELECT Precio FROM Producto WHERE ID_PROD = 4;
+```
+
+Veamos si en la siguiente compra se aplica el descuento.
+```sql
+INSERT INTO Compra VALUES (3030);
+
+INSERT INTO Carrito VALUES (3030, 4, 1);
+
+INSERT INTO Transaccion
+VALUES (5050, '55555555G', '12345684G', 'T007', 3030);
+
+SELECT Importe FROM Transaccion WHERE ID_TRANS = 5050;
 ```
