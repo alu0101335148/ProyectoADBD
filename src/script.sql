@@ -115,7 +115,7 @@ CREATE TABLE Transaccion(
     DNI_CLI VARCHAR(9),
     DNI_EMP VARCHAR(9),
     ID_TIE VARCHAR(30),
-    ID_COMP INT NOT NULL,
+    ID_COMP INT UNIQUE,
     Importe FLOAT,
     Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
     FOREIGN KEY (DNI_CLI) REFERENCES Cliente(DNI_CLI) ON DELETE SET NULL,
@@ -185,10 +185,10 @@ CREATE OR REPLACE FUNCTION check_supervisa()
 RETURNS TRIGGER AS $$
 BEGIN
     IF (SELECT COUNT(*) 
-        FROM Trabaja 
+        FROM Trabaja JOIN Logistica USING (DNI_EMP)
         WHERE DNI_EMP = NEW.DNI_SUPER AND 
         ID_TIE = NEW.ID_ALM) = 0 THEN
-      RAISE EXCEPTION 'El empleado % no trabaja en la tienda %', NEW.DNI_SUPER, NEW.ID_ALM;
+      RAISE EXCEPTION 'El empleado % no ha trabajado nunca en la tienda %', NEW.DNI_SUPER, NEW.ID_ALM;
     END IF;
     RETURN NEW;
 END;
@@ -199,6 +199,7 @@ BEFORE INSERT OR UPDATE ON Almacen
 FOR EACH ROW
 EXECUTE PROCEDURE check_supervisa();
 
+-- Aplica un descuento de 10 a los clientet
 CREATE OR REPLACE FUNCTION check_descuento()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -224,7 +225,7 @@ BEGIN
                    FROM Transaccion JOIN Compra USING (ID_COMP)
                    JOIN Carrito USING (ID_COMP)
                    JOIN Producto USING (ID_PROD)
-                   WHERE ID_TRANS = NEW.ID_TRANS) 
+                   WHERE ID_COMP = NEW.ID_COMP)
     WHERE ID_TRANS = NEW.ID_TRANS;
     RETURN NEW;
 END;
@@ -234,3 +235,40 @@ CREATE TRIGGER check_importe_trigger
 AFTER INSERT ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_importe();
+
+-- Revisar que en una transacción no se pueda comprar un producto que no esté en la tienda
+CREATE OR REPLACE FUNCTION check_producto()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (SELECT COUNT(*) 
+        FROM DisponibilidadTienda 
+        WHERE ID_TIE = NEW.ID_TIE AND 
+        ID_PROD = NEW.ID_PROD) = 0 THEN
+      RAISE EXCEPTION 'El producto % no está en la tienda %', NEW.ID_PROD, NEW.ID_TIE;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER check_producto_trigger
+BEFORE INSERT OR UPDATE ON Transaccion
+FOR EACH ROW
+EXECUTE PROCEDURE check_producto();
+
+-- Revisar que en una transacción no te pueda atender un empleado que no sea cajero en esa tienda
+CREATE OR REPLACE FUNCTION check_cajero()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (SELECT COUNT(*) 
+        FROM Trabaja JOIN Cajero USING (DNI_EMP) 
+        WHERE DNI_EMP = NEW.DNI_EMP AND 
+        ID_TIE = NEW.ID_TIE) = 0 THEN
+      RAISE EXCEPTION 'El empleado % no es cajero en la tienda %', NEW.DNI_EMP, NEW.ID_TIE;
+    END IF;
+    RETURN NEW;
+END;
+
+CREATE TRIGGER check_cajero_trigger
+BEFORE INSERT OR UPDATE ON Transaccion
+FOR EACH ROW
+EXECUTE PROCEDURE check_cajero();
