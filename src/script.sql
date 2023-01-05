@@ -216,7 +216,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER check_descuento_trigger
-AFTER UPDATE ON Transaccion
+AFTER INSERT ON Transaccion
 FOR EACH ROW
 EXECUTE PROCEDURE check_descuento();
 
