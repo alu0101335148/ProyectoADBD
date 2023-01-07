@@ -6,16 +6,38 @@
 
 - Andrés Pérez Castellano (alu0101313511@ull.edu.es)
 
+## Objetivos
+
+- Almacenar la información de los productos disponibles en la tienda.
+
+- Almacenar la información del personal designado contratado.
+
+- Contemplar las diferentes categorías de productos de la empresa.
+
+- Contemplar los diferentes roles de los empleados, pudiendo almacenar la 
+  información correspondientes de estos, como el cargo, la información 
+  personal, horario, etc.
+
+- La base de datos deberá almacenar la información correspondiente a los 
+  clientes.
+
+- Almacenar información de interés extraída de las transacciones realizadas.
+
+- Desarrollar una interfaz de comunicación tipo REST API, que facilite tanto a 
+  los usuarios finales, como a otras aplicaciones y servicios internos de la 
+  empresa el acceso a la información disponible en la base de datos.
+
 ## Supuesto teórico
 
-Se desea desarrollar una base de datos para una empresa que tiene diferentes supermercados. Esta 
-base de datos ha de almacenar la información necesaria para llevar un control de los productos que 
-hay en cada una de las tiendas, de las cuales conocemos su identificador, dirección y superficie. 
+Se desea desarrollar una base de datos para una empresa que tiene diferentes 
+supermercados. Esta base de datos ha de almacenar la información necesaria para
+llevar un control de los productos que hay en cada una de las tiendas, de las 
+cuales conocemos su identificador, dirección y superficie. 
 
-Debemos almacenar de cada producto información de interés como el identificador del producto, el 
-nombre, el distribuidor, la marca, el precio, la descripcción, la categoría ('Alimentacion', 
-'Limpieza', 'Higiene', 'Textil', 'Herramientas' y 'Otros') y la fecha de caducidad para algunos de
-ellos.
+Debemos almacenar de cada producto información de interés como el identificador
+del producto, el nombre, el distribuidor, la marca, el precio, la descripcción,
+la categoría ('Alimentacion', 'Limpieza', 'Higiene', 'Textil', 'Herramientas' y
+'Otros') y la fecha de caducidad para algunos de ellos.
 
 De igual manera de quiere llevar un control de la contratacion de los empleados, guardando su 
 información personal (DNI, nombre, apellidos, dirección, salario, horario de entrada y salida, 
