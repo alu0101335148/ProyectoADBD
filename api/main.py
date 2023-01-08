@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from enum import Enum
 from typing import Union, List
-from datetime import date
+from datetime import date, time
 import os
 import psycopg2
 from dotenv import load_dotenv
@@ -37,7 +37,7 @@ class Producto(BaseModel):
     precio: float
     descripcion: str
     categoria: str
-    fecha_caducidad: Union[date, None] = None
+    fechacaducidad: Union[date, None] = None
 
 class ProductoInsert(BaseModel):
     nombre: str
@@ -46,7 +46,7 @@ class ProductoInsert(BaseModel):
     precio: float
     descripcion: str
     categoria: str
-    fecha_caducidad: Union[date, None] = None
+    fechacaducidad: Union[date, None] = None
 
 class ProductoUpdate(BaseModel):
     nombre: Union[str, None] = None
@@ -55,7 +55,7 @@ class ProductoUpdate(BaseModel):
     precio: Union[float, None] = None
     descripcion: Union[str, None] = None
     categoria: Union[str, None] = None
-    fecha_caducidad: Union[date, None] = None
+    fechacaducidad: Union[date, None] = None
 
 @app.get("/products/", tags=["products"])
 def get_products() -> List[Producto]:
@@ -101,7 +101,6 @@ def get_product(product_id: int) -> Producto:
         if not result:
             raise ValueError()
         product = result[0]
-        print(product)
 
         cur.close()
         # return a json with the result of the query
@@ -300,7 +299,6 @@ def get_client(client_DNI: str) -> Cliente:
         if not result:
             raise ValueError()
         client = result[0]
-        print(client)
 
         cur.close()
         # return a json with the result of the query
@@ -491,7 +489,6 @@ def get_store(store_id: str) -> Tienda:
         if not result:
             raise ValueError()
         store = result[0]
-        print(store)
 
         cur.close()
         # return a json with the result of the query
@@ -669,7 +666,6 @@ def get_warehouse(warehouse_id: str) -> Almacen:
         if not result:
             raise ValueError()
         warehouse = result[0]
-        print(warehouse)
 
         cur.close()
         # return a json with the result of the query
@@ -820,6 +816,7 @@ def get_availability(destination: Destino) -> List[Union[DisponibilidadTienda, D
         cur = conn.cursor()
         statement = f"""
         SELECT * FROM {table}
+        LIMIT 20
         """
         cur.execute(statement, [])
         result = cur.fetchall()
@@ -967,3 +964,376 @@ def delete_availability(destination: Destino, id: str, id_prod: int):
     finally:
         if conn is not None:
             conn.close()
+
+# *****************************************************************************
+
+class Puesto(Enum):
+    CAJERO = "Cajero"
+    CHARCUTERIA = "Charcuteria"
+    LOGISTICA = "Logistica"
+    GERENTE = "Gerente"
+    PESCADERIA = "Pescaderia"
+    CARNICERIA = "Carniceria"
+
+class Empleado(BaseModel):
+    dni_emp: str
+    nombre: str
+    apellidos: str
+    calle: str
+    ciudad: str
+    provincia: str
+    salario: float
+    horaentrada: time
+    horasalida: time
+    numcuenta: str
+    rol: Puesto
+    herramienta: Union[int, None] = None
+
+class EmpleadoUpdate(BaseModel):
+    nombre: Union[str, None] = None
+    apellidos: Union[str, None] = None
+    calle: Union[str, None] = None
+    ciudad: Union[str, None] = None
+    provincia: Union[str, None] = None
+    salario: Union[float, None] = None
+    horaentrada: Union[time, None] = None
+    horasalida: Union[time, None] = None
+    numcuenta: Union[str, None] = None
+    rol: Union[Puesto, None] = None
+    herramienta: Union[int, None] = None
+
+MACHINES = {
+    Puesto.CAJERO: "Caja",
+    Puesto.CHARCUTERIA: "Cortadora",
+    Puesto.LOGISTICA: "Montacargas",
+}
+
+@app.get("/employees/", tags=["employees"])
+def get_employees() -> List[Empleado]:
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        SELECT *
+        FROM Empleado
+        LIMIT 20;
+        """
+        cur.execute(statement)
+        result = cur.fetchall()
+
+        # return a json with the result of the query
+        employees = [dict((cur.description[i][0], value)
+                     for i, value in enumerate(row)) for row in result]
+        for employee in employees:
+            rol = Puesto(employee["rol"])
+            if rol in MACHINES.keys():
+                table = rol.value
+                statement = f"""
+                SELECT {MACHINES[rol]}
+                FROM {table}
+                WHERE DNI_EMP = %s;
+                """
+                cur.execute(statement, [employee["dni_emp"]])
+                result = cur.fetchall()
+                employee["herramienta"] = result[0][0]
+        cur.close()
+        return employees
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en lectura de empleados: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+@app.get("/employees/{dni_emp}/", tags=["employees"])
+def get_employee(dni_emp: str) -> Empleado:
+    conn = None
+    try:
+        # Get the employee
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        SELECT *
+        FROM Empleado 
+        WHERE DNI_EMP = %s;
+        """
+        cur.execute(statement, [dni_emp])
+        result = cur.fetchall()
+
+        # Check whether it is a valid store id or not.
+        if len(result) == 0:
+            raise ValueError
+
+        # return a json with the result of the query
+        employee = dict((cur.description[i][0], value) for i, value in enumerate(result[0]))
+
+        # Add the machine to the employee if it has one
+        rol = Puesto(employee["rol"])
+        if rol in MACHINES.keys():
+            table = rol.value
+            statement = f"""
+            SELECT {MACHINES[rol]}
+            FROM {table}
+            WHERE DNI_EMP = %s;
+            """
+            cur.execute(statement, [dni_emp])
+            result = cur.fetchall()
+            employee["herramienta"] = result[0][0]
+
+        cur.close()
+        # return a json with the result of the query
+        return employee
+    except ValueError:
+        raise HTTPException(
+            status_code=404, detail=f"Empleado/a {dni_emp} desconocido/a")
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en lectura de empleados: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+@app.post("/employees/", tags=["employees"])
+def create_employee(employee: Empleado):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        INSERT INTO Empleado
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
+        """
+        cur.execute(
+            statement, 
+            [
+                employee.dni_emp, 
+                employee.nombre, 
+                employee.apellidos, 
+                employee.calle, 
+                employee.ciudad, 
+                employee.provincia, 
+                employee.salario, 
+                employee.horaentrada, 
+                employee.horasalida, 
+                employee.numcuenta, 
+                employee.rol.value
+            ]
+        )
+        # insert the machine if it has one in the corresponding table
+        rol = Puesto(employee.rol)
+        if rol in MACHINES.keys():
+            table = rol.value
+            statement = f"""
+            INSERT INTO {table} (DNI_EMP, {MACHINES[rol]})
+            VALUES (%s, %s);
+            """
+            cur.execute(statement, [employee.dni_emp, employee.herramienta])
+        conn.commit()
+        cur.close()
+        return {"Creado correctamente": employee.dict()}
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en creación de empleado/a: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+@app.put("/employees/{dni_emp}/", tags=["employees"])
+def update_employee(dni_emp: str, employee: EmpleadoUpdate):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        # get the previous information of the employee and update only the new information
+        statement = """
+        SELECT *
+        FROM Empleado
+        WHERE DNI_EMP = %s;
+        """
+        cur.execute(statement, [dni_emp])
+        result = cur.fetchall()
+        if len(result) == 0:
+            raise ValueError
+        previous_employee = dict((cur.description[i][0], value) for i, value in enumerate(result[0]))
+        # update the employee with the new information 
+        statement = """
+        UPDATE Empleado
+        SET nombre = %s, apellidos = %s, calle = %s, ciudad = %s, provincia = %s, salario = %s, horaentrada = %s, horasalida = %s, numcuenta = %s, rol = %s
+        WHERE DNI_EMP = %s;
+        """
+        cur.execute(
+            statement, 
+            [
+                employee.nombre if employee.nombre else previous_employee["nombre"], 
+                employee.apellidos if employee.apellidos else previous_employee["apellidos"], 
+                employee.calle if employee.calle else previous_employee["calle"], 
+                employee.ciudad if employee.ciudad else previous_employee["ciudad"], 
+                employee.provincia if employee.provincia else previous_employee["provincia"], 
+                employee.salario if employee.salario else previous_employee["salario"], 
+                employee.horaentrada if employee.horaentrada else previous_employee["horaentrada"], 
+                employee.horasalida if employee.horasalida else previous_employee["horasalida"], 
+                employee.numcuenta if employee.numcuenta else previous_employee["numcuenta"], 
+                employee.rol.value if employee.rol else previous_employee["rol"], 
+                dni_emp
+            ]
+        )
+        # if the previous employee has a machine but with the new information not, then delete the entry in the corresponding table
+        if previous_employee["rol"] in MACHINES.keys() and not employee.rol:
+            table = previous_employee["rol"]
+            statement = f"""
+            DELETE FROM {table}
+            WHERE DNI_EMP = %s;
+            """
+            cur.execute(statement, [dni_emp])
+        # if the previous employee has a machine and with the new information also, but in a different role, then delete the previous entry and insert the new one
+        elif previous_employee["rol"] in MACHINES.keys() and employee.rol and previous_employee["rol"] != employee.rol.value:
+            table = previous_employee["rol"]
+            statement = f"""
+            DELETE FROM {table}
+            WHERE DNI_EMP = %s;
+            """
+            cur.execute(statement, [dni_emp])
+            table = employee.rol.value
+            statement = f"""
+            INSERT INTO {table} (DNI_EMP, {MACHINES[employee.rol]})
+            VALUES (%s, %s);
+            """
+            cur.execute(statement, [dni_emp, employee.herramienta])
+        # if the previous employee has a machine and with the new information also, but in the same role, then update the machine
+        elif previous_employee["rol"] in MACHINES.keys() and employee.rol:
+            table = previous_employee["rol"]
+            statement = f"""
+            UPDATE {table}
+            SET {MACHINES[previous_employee["rol"]]} = %s
+            WHERE DNI_EMP = %s;
+            """
+            cur.execute(statement, [employee.herramienta, dni_emp])
+        # if the previous employee has not a machine but with the new information yes, then insert the new one
+        elif not previous_employee["rol"] in MACHINES.keys() and employee.rol:
+            table = employee.rol.value
+            statement = f"""
+            INSERT INTO {table} (DNI_EMP, {MACHINES[employee.rol]})
+            VALUES (%s, %s);
+            """
+            cur.execute(statement, [dni_emp, employee.herramienta])
+        conn.commit()
+        cur.close()
+        return {"Actualizado correctamente": employee.dict()}
+    except ValueError:
+        raise HTTPException(
+            status_code=404, detail=f"Empleado/a {dni_emp} desconocido/a")
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en actualización de empleado/a: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+@app.delete("/employees/{dni_emp}/", tags=["employees"])
+def delete_employee(dni_emp: str):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        DELETE FROM Empleado
+        WHERE dni_emp = %s;
+        """
+        cur.execute(statement, [dni_emp])
+        # delete the machine if it has one in the corresponding table
+        statement = """
+        SELECT rol
+        FROM Empleado
+        WHERE dni_emp = %s;
+        """
+        cur.execute(statement, [dni_emp])
+        result = cur.fetchall()
+        if len(result) != 0:
+            rol = Puesto(result[0][0])
+            if rol in MACHINES.keys():
+                table = rol.value
+                statement = f"""
+                DELETE FROM {table}
+                WHERE DNI_EMP = %s;
+                """
+                cur.execute(statement, [dni_emp])
+        conn.commit()
+        cur.close()
+        return {"Borrado correctamente": dni_emp}
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en borrado de empleado/a: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+# *****************************************************************************
+
+class Trabaja(BaseModel):
+    id_tie: str
+    fechainicio: date
+    fechafin: date
+
+@app.get("/works/", tags=["works"])
+def get_works():
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        SELECT *
+        FROM Trabaja
+        LIMIT 20;
+        """
+        cur.execute(statement)
+        result = cur.fetchall()
+
+        cur.close()
+        # return a json with the result of the query
+        works = [dict((cur.description[i][0], value)
+                         for i, value in enumerate(row)) for row in result]
+        return works
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail="Error en lectura de trabajos: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+
+@app.get("/works/{dni_emp}/", tags=["works"])
+def get_works_by_employee(dni_emp: str):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        SELECT *
+        FROM Trabaja 
+        WHERE DNI_EMP = %s;
+        """
+        cur.execute(statement, [dni_emp])
+        result = cur.fetchall()
+
+        # Check whether it is a valid store id or not.
+        if not result:
+            raise ValueError()
+        works = result[0]
+
+        cur.close()
+        # return a json with the result of the query
+        return {cur.description[i][0]: value for i, value in enumerate(works)}
+    except ValueError:
+        raise HTTPException(
+            status_code=404, detail=f"Trabajo de {dni_emp} desconocida")
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en lectura de trabajos: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+@app.post("/works/", tags=["works"])
+def create_work(work: Trabaja):
+    pass
