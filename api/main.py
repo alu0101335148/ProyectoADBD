@@ -1271,9 +1271,10 @@ def delete_employee(dni_emp: str):
 # *****************************************************************************
 
 class Trabaja(BaseModel):
+    dni_emp: str
     id_tie: str
     fechainicio: date
-    fechafin: date
+    fechafin: Union[date, None] = None
 
 @app.get("/works/", tags=["works"])
 def get_works():
@@ -1336,4 +1337,47 @@ def get_works_by_employee(dni_emp: str):
 
 @app.post("/works/", tags=["works"])
 def create_work(work: Trabaja):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        INSERT INTO Trabaja
+        VALUES (%s, %s, %s, %s);
+        """
+        cur.execute(statement, [work.dni_emp, work.id_tie, work.fechainicio, work.fechafin])
+        conn.commit()
+        cur.close()
+        return {"Creado correctamente": work.dict()}
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en creación de trabajo: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+@app.put("/works/{dni_emp}/", tags=["works"])
+def update_work(dni_emp: str, work: Trabaja):
+    pass
+
+@app.delete("/works/{dni_emp}/", tags=["works"])
+def delete_work(dni_emp: str):
+    # conn = None
+    # try:
+    #     conn = get_db_connection()
+    #     cur = conn.cursor()
+    #     statement = """
+    #     DELETE FROM Trabaja
+    #     WHERE dni_emp = %s;
+    #     """
+    #     cur.execute(statement, [dni_emp])
+    #     conn.commit()
+    #     cur.close()
+    #     return {"Borrado correctamente": dni_emp}
+    # except psycopg2.DatabaseError as e:
+    #     raise HTTPException(
+    #         status_code=500, detail=f"Error en borrado de trabajo: {e.pgerror}")
+    # finally:
+    #     if conn is not None:
+    #         conn.close()
     pass
