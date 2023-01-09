@@ -300,7 +300,7 @@ CREATE OR REPLACE FUNCTION update_stock()
 RETURNS TRIGGER AS $$
 BEGIN
     UPDATE DisponibilidadTienda d
-    SET Cantidad = Cantidad - c.Cantidad
+    SET Cantidad = d.Cantidad - c.Cantidad
     FROM Carrito c
     WHERE c.ID_COMP = NEW.ID_COMP AND
           c.ID_PROD = d.ID_PROD AND

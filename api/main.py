@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from enum import Enum
 from typing import Union, List
-from datetime import date, time
+from datetime import date, time, datetime
 import os
 import psycopg2
 from dotenv import load_dotenv
@@ -78,7 +78,7 @@ def get_products() -> List[Producto]:
         return products
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail="Error en lectura de productos: {e.pgerror}")
+            status_code=500, detail=f"Error en lectura de productos: {e.pgerror}")
     finally:
         if conn is not None:
             conn.close()
@@ -276,7 +276,7 @@ def get_clients() -> List[Cliente]:
         return clients
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail="Error en lectura de clientes: {e.pgerror}")
+            status_code=500, detail=f"Error en lectura de clientes: {e.pgerror}")
     finally:
         if conn is not None:
             conn.close()    
@@ -466,7 +466,7 @@ def get_stores() -> List[Tienda]:
         return stores
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail="Error en lectura de tiendas: {e.pgerror}")
+            status_code=500, detail=f"Error en lectura de tiendas: {e.pgerror}")
     finally:
         if conn is not None:
             conn.close()    
@@ -643,7 +643,7 @@ def get_warehouses() -> List[Almacen]:
         return warehouse
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail="Error en lectura de almacenes: {e.pgerror}")
+            status_code=500, detail=f"Error en lectura de almacenes: {e.pgerror}")
     finally:
         if conn is not None:
             conn.close()
@@ -1165,22 +1165,22 @@ def update_employee(dni_emp: str, employee: EmpleadoUpdate):
         cur.execute(
             statement, 
             [
-                employee.nombre if employee.nombre else previous_employee["nombre"], 
-                employee.apellidos if employee.apellidos else previous_employee["apellidos"], 
-                employee.calle if employee.calle else previous_employee["calle"], 
-                employee.ciudad if employee.ciudad else previous_employee["ciudad"], 
-                employee.provincia if employee.provincia else previous_employee["provincia"], 
-                employee.salario if employee.salario else previous_employee["salario"], 
-                employee.horaentrada if employee.horaentrada else previous_employee["horaentrada"], 
-                employee.horasalida if employee.horasalida else previous_employee["horasalida"], 
-                employee.numcuenta if employee.numcuenta else previous_employee["numcuenta"], 
-                employee.rol.value if employee.rol else previous_employee["rol"], 
+                employee.nombre or previous_employee["nombre"], 
+                employee.apellidos or previous_employee["apellidos"], 
+                employee.calle or previous_employee["calle"], 
+                employee.ciudad or previous_employee["ciudad"], 
+                employee.provincia or previous_employee["provincia"], 
+                employee.salario or previous_employee["salario"], 
+                employee.horaentrada or previous_employee["horaentrada"], 
+                employee.horasalida or previous_employee["horasalida"], 
+                employee.numcuenta or previous_employee["numcuenta"], 
+                employee.rol.value or previous_employee["rol"], 
                 dni_emp
             ]
         )
         # if the previous employee has a machine but with the new information not, then delete the entry in the corresponding table
-        if previous_employee["rol"] in MACHINES.keys() and not employee.rol:
-            table = previous_employee["rol"]
+        if previous_employee["rol"] in MACHINES.keys() and employee.rol not in MACHINES.keys():
+            table = previous_employee["rol"].value
             statement = f"""
             DELETE FROM {table}
             WHERE DNI_EMP = %s;
@@ -1188,7 +1188,7 @@ def update_employee(dni_emp: str, employee: EmpleadoUpdate):
             cur.execute(statement, [dni_emp])
         # if the previous employee has a machine and with the new information also, but in a different role, then delete the previous entry and insert the new one
         elif previous_employee["rol"] in MACHINES.keys() and employee.rol and previous_employee["rol"] != employee.rol.value:
-            table = previous_employee["rol"]
+            table = previous_employee["rol"].value
             statement = f"""
             DELETE FROM {table}
             WHERE DNI_EMP = %s;
@@ -1202,7 +1202,7 @@ def update_employee(dni_emp: str, employee: EmpleadoUpdate):
             cur.execute(statement, [dni_emp, employee.herramienta])
         # if the previous employee has a machine and with the new information also, but in the same role, then update the machine
         elif previous_employee["rol"] in MACHINES.keys() and employee.rol:
-            table = previous_employee["rol"]
+            table = previous_employee["rol"].value
             statement = f"""
             UPDATE {table}
             SET {MACHINES[previous_employee["rol"]]} = %s
@@ -1210,7 +1210,7 @@ def update_employee(dni_emp: str, employee: EmpleadoUpdate):
             """
             cur.execute(statement, [employee.herramienta, dni_emp])
         # if the previous employee has not a machine but with the new information yes, then insert the new one
-        elif not previous_employee["rol"] in MACHINES.keys() and employee.rol:
+        elif previous_employee["rol"] not in MACHINES.keys() and employee.rol:
             table = employee.rol.value
             statement = f"""
             INSERT INTO {table} (DNI_EMP, {MACHINES[employee.rol]})
@@ -1277,7 +1277,7 @@ class Trabaja(BaseModel):
     fechafin: Union[date, None] = None
 
 @app.get("/works/", tags=["works"])
-def get_works():
+def get_works() -> List[Trabaja]:
     conn = None
     try:
         conn = get_db_connection()
@@ -1290,21 +1290,21 @@ def get_works():
         cur.execute(statement)
         result = cur.fetchall()
 
-        cur.close()
         # return a json with the result of the query
         works = [dict((cur.description[i][0], value)
                          for i, value in enumerate(row)) for row in result]
+        cur.close()
         return works
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail="Error en lectura de trabajos: {e.pgerror}")
+            status_code=500, detail=f"Error en lectura de trabajos: {e.pgerror}")
     finally:
         if conn is not None:
             conn.close()
 
 
 @app.get("/works/{dni_emp}/", tags=["works"])
-def get_works_by_employee(dni_emp: str):
+def get_works_by_employee(dni_emp: str) -> List[Trabaja]:
     conn = None
     try:
         conn = get_db_connection()
@@ -1320,11 +1320,12 @@ def get_works_by_employee(dni_emp: str):
         # Check whether it is a valid store id or not.
         if not result:
             raise ValueError()
-        works = result[0]
+        works = result
 
         cur.close()
         # return a json with the result of the query
-        return {cur.description[i][0]: value for i, value in enumerate(works)}
+        return [dict((cur.description[i][0], value)
+                         for i, value in enumerate(row)) for row in works]
     except ValueError:
         raise HTTPException(
             status_code=404, detail=f"Trabajo de {dni_emp} desconocida")
@@ -1356,28 +1357,202 @@ def create_work(work: Trabaja):
         if conn is not None:
             conn.close()
 
-@app.put("/works/{dni_emp}/", tags=["works"])
-def update_work(dni_emp: str, work: Trabaja):
-    pass
+@app.put("/works/finish/{dni_emp}/", tags=["works"])
+def update_work(dni_emp: str):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        UPDATE Trabaja
+        SET FechaFin = %s
+        WHERE dni_emp = %s AND FechaFin IS NULL;
+        """
+        cur.execute(statement, [date.today(), dni_emp])
+        conn.commit()
+        cur.close()
+        return {"Actualizado correctamente": dni_emp}
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en actualización de trabajo: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()    
 
-@app.delete("/works/{dni_emp}/", tags=["works"])
-def delete_work(dni_emp: str):
-    # conn = None
-    # try:
-    #     conn = get_db_connection()
-    #     cur = conn.cursor()
-    #     statement = """
-    #     DELETE FROM Trabaja
-    #     WHERE dni_emp = %s;
-    #     """
-    #     cur.execute(statement, [dni_emp])
-    #     conn.commit()
-    #     cur.close()
-    #     return {"Borrado correctamente": dni_emp}
-    # except psycopg2.DatabaseError as e:
-    #     raise HTTPException(
-    #         status_code=500, detail=f"Error en borrado de trabajo: {e.pgerror}")
-    # finally:
-    #     if conn is not None:
-    #         conn.close()
-    pass
+# *****************************************************************************
+
+class CantidadProducto(BaseModel):
+    id_prod: int
+    cantidad: int
+
+class TransaccionCompra(BaseModel):
+    id_trans: int
+    dni_emp: str
+    dni_cli: str
+    id_tie: str
+    importe: float
+    fecha: datetime
+    carrito: List[CantidadProducto]
+
+class TransaccionCompraInsert(BaseModel):
+    dni_emp: str
+    dni_cli: str
+    id_tie: str
+    carrito: List[CantidadProducto]
+
+@app.get("/purchases/", tags=["purchases"])
+def get_purchases() -> List[TransaccionCompra]:
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        SELECT *
+        FROM Transaccion
+        LIMIT 20
+        """
+        cur.execute(statement)
+        result = cur.fetchall()
+        purchases = [dict((cur.description[i][0], value)
+                         for i, value in enumerate(row)) for row in result]
+        for purchase in purchases:
+            id_comp = purchase.pop("id_comp")
+            purchase["carrito"] = []
+            aux_statement = """
+            SELECT id_prod, cantidad
+            FROM CARRITO
+            WHERE ID_COMP = %s
+            """
+            cur.execute(aux_statement, [id_comp])
+            aux_result = cur.fetchall()
+            for row in aux_result:
+                purchase["carrito"].append(dict((cur.description[i][0], value)
+                                                for i, value in enumerate(row)))
+        cur.close()
+        return purchases
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en lectura de compras: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+# por tienda
+@app.get("/purchases/store/{id_tie}/", tags=["purchases"])
+def get_purchases_by_store(id_tie: str) -> List[TransaccionCompra]:
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        SELECT *
+        FROM Transaccion
+        WHERE ID_TIE = %s
+        LIMIT 20
+        """
+        cur.execute(statement, [id_tie])
+        result = cur.fetchall()
+        purchases = [dict((cur.description[i][0], value)
+                         for i, value in enumerate(row)) for row in result]
+        for purchase in purchases:
+            id_comp = purchase.pop("id_comp")
+            purchase["carrito"] = []
+            aux_statement = """
+            SELECT id_prod, cantidad
+            FROM CARRITO
+            WHERE ID_COMP = %s
+            """
+            cur.execute(aux_statement, [id_comp])
+            aux_result = cur.fetchall()
+            for row in aux_result:
+                purchase["carrito"].append(dict((cur.description[i][0], value)
+                                                for i, value in enumerate(row)))
+        cur.close()
+        return purchases
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en lectura de compras: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+# por cliente
+@app.get("/purchases/client/{dni_cli}/", tags=["purchases"])
+def get_purchases_by_client(dni_cli: str) -> List[TransaccionCompra]:
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        SELECT *
+        FROM Transaccion
+        WHERE DNI_CLI = %s
+        LIMIT 20
+        """
+        cur.execute(statement, [dni_cli])
+        result = cur.fetchall()
+        purchases = [dict((cur.description[i][0], value)
+                         for i, value in enumerate(row)) for row in result]
+        for purchase in purchases:
+            id_comp = purchase.pop("id_comp")
+            purchase["carrito"] = []
+            aux_statement = """
+            SELECT id_prod, cantidad
+            FROM CARRITO
+            WHERE ID_COMP = %s
+            """
+            cur.execute(aux_statement, [id_comp])
+            aux_result = cur.fetchall()
+            for row in aux_result:
+                purchase["carrito"].append(dict((cur.description[i][0], value)
+                                                for i, value in enumerate(row)))
+        cur.close()
+        return purchases
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en lectura de compras: {e.pgerror}")
+    finally:
+        if conn is not None:
+            conn.close()
+
+@app.post("/purchases/", tags=["purchases"])
+def insert_purchase(purchase: TransaccionCompraInsert):
+    conn = None
+    try:
+        conn = get_db_connection()
+        cur = conn.cursor()
+        statement = """
+        INSERT INTO Compra
+        VALUES (DEFAULT)
+        RETURNING id_comp
+        """
+        cur.execute(statement)
+        id_comp = cur.fetchone()[0]
+
+        if len(purchase.carrito) == 0:
+            raise ValueError()
+
+        for item in purchase.carrito:
+            aux_statement = """
+            INSERT INTO Carrito (id_comp, id_prod, cantidad)
+            VALUES (%s, %s, %s)
+            """
+            cur.execute(aux_statement, [id_comp, item.id_prod, item.cantidad])
+
+        statement = """
+        INSERT INTO Transaccion (dni_emp, dni_cli, id_tie, id_comp)
+        VALUES (%s, %s, %s, %s)
+        """
+        cur.execute(statement, [purchase.dni_emp, purchase.dni_cli, purchase.id_tie, id_comp])
+        conn.commit()
+        cur.close()
+        return {"Insertado correctamente": {"id_comp": id_comp}}
+    except psycopg2.DatabaseError as e:
+        raise HTTPException(
+            status_code=500, detail=f"Error en inserción de compra: {e.pgerror}")
+    except ValueError:
+        raise HTTPException(
+            status_code=400, detail=f"Carrito vacío")
+    finally:
+        if conn is not None:
+            conn.close()
