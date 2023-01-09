@@ -1,26 +1,17 @@
 -- Script para cargar los datos iniciales.
 
--- Inserción de datos para los clientes
 INSERT INTO Cliente VALUES 
-('12345678A', 'Juan', 'Perez', '346404646', 'Calle 1', 'Ciudad 1', 'Provincia 1', 0.1),
-('87654321B', 'Pepe', 'Garcia', '346656766', 'Calle 2', 'Ciudad 2', 'Provincia 2', 0.2),
-('11111111C', 'Maria', 'Gonzalez', '646886861', 'Calle 3', 'Ciudad 3', 'Provincia 3', 0.3),
-('22222222D', 'Luis', 'Rodriguez', '122678646', 'Calle 4', 'Ciudad 4', 'Provincia 4', 0.4),
-('33333333E', 'Ana', 'Martinez', '562163336', 'Calle 5', 'Ciudad 5', 'Provincia 5', 0.5),
-('44444444F', 'Jose', 'Lopez', '232362366', 'Calle 6', 'Ciudad 6', 'Provincia 6', 0.6),
-('55555555G', 'Laura', 'Sanchez', '969699626', 'Calle 7', 'Ciudad 7', 'Provincia 7', 0.7);
+('12345678A', 'Juan', 'Perez', 'JuanPerez@gmail.com', '346404646', 'Calle 1', 'Ciudad 1', 'Provincia 1'),
+('12345678B', 'Pepe', 'Garcia', 'PepeGarcia@gmail.com', '346656766', 'Calle 2', 'Ciudad 2', 'Provincia 2'),
+('12345678C', 'Maria', 'Gonzalez', 'MariaGonzalez@gmail.com', '646886861', 'Calle 3', 'Ciudad 3', 'Provincia 3'),
+('12345678D', 'Luis', 'Rodriguez', NULL, '122678646', 'Calle 4', 'Ciudad 4', 'Provincia 4'),
+('12345678E', 'Ana', 'Martinez', NULL, '562163336', 'Calle 5', 'Ciudad 5', 'Provincia 5'),
+('12345678F', 'Jose', 'Lopez', NULL, '232362366', 'Calle 6', 'Ciudad 6', 'Provincia 6'),
+('12345678G', 'Laura', 'Sanchez', NULL, '969699626', 'Calle 7', 'Ciudad 7', 'Provincia 7'),
+('12345678H', 'Antonio', 'Fernandez', NULL, '346404646', 'Calle 8', 'Ciudad 8', 'Provincia 8');
 
--- Insertar datos para los productos
--- CREATE TABLE Producto(
---     ID_PROD SERIAL PRIMARY KEY,
---     Nombre VARCHAR(30) NOT NULL,
---     Distribuidor VARCHAR(30) NOT NULL,
---     Marca VARCHAR(30) NOT NULL,
---     Precio FLOAT NOT NULL,
---     Descripcion VARCHAR(150) NOT NULL,
---     Categoria CATEGORIAS NOT NULL,
---     FechaCaducidad DATE
--- );
+
+
 INSERT INTO Producto VALUES 
 (DEFAULT, 'Crema hidratante', 'Distribuidora Cream', 'Soft Skin S.A.', 12.99, 'Crema hidratante para piel seca y sensible', 'Higiene', '2023-01-31'),
 (DEFAULT, 'Sábanas de algodón', 'Distribuidora Sheets', 'Comfy Bedding S.L.', 24.99, 'Sábanas suaves y cómodas de algodón 100%', 'Textil', NULL),
@@ -39,72 +30,44 @@ INSERT INTO Producto VALUES
 (DEFAULT, 'Cereales integrales', 'Distribuidora Cereal', 'Whole Grains S.L.', 4.99, 'Cereales integrales con frutas y nueces', 'Alimentacion', '2023-07-01');
 
 
--- Insertar datos para los empleados
--- CREATE TABLE Empleado(
---     DNI_EMP VARCHAR(9) PRIMARY KEY,
---     Nombre VARCHAR(30) NOT NULL,
---     Apellidos VARCHAR(30) NOT NULL,
---     Calle VARCHAR(30) NOT NULL,
---     Ciudad VARCHAR(30) NOT NULL,
---     Provincia VARCHAR(30) NOT NULL,
---     Salario FLOAT NOT NULL,
---     HoraEntrada TIME NOT NULL,
---     HoraSalida TIME NOT NULL,
---     NumCuenta VARCHAR(30) NOT NULL,
---     Rol PUESTO NOT NULL
--- );
-INSERT INTO Empleado VALUES 
-('12345678A', 'Juan', 'Pérez', 'Calle del Sol', 'Madrid', 'Madrid', 1200, '09:00:00', '17:00:00', '123456781234', 'Cajero'),
-('12345679B', 'Ana', 'García', 'Calle de la Luna', 'Barcelona', 'Cataluña', 1400, '08:00:00', '16:00:00', '123456791234', 'Charcuteria'),
-('12345680C', 'Pablo', 'Rodríguez', 'Calle del Mar', 'Valencia', 'Valencia', 1600, '09:00:00', '17:00:00', '12345680234', 'Logistica'),
-('12345681D', 'Sandra', 'Lopez', 'Calle de las Estrellas', 'Sevilla', 'Andalucía', 1800, '09:00:00', '17:00:00', '12345681234', 'Gerente'),
-('12345682E', 'Alberto', 'Fernandez', 'Calle del Rio', 'Zaragoza', 'Aragón', 2000, '09:00:00', '17:00:00', '12345682234', 'Pescaderia'),
-('12345683F', 'Laura', 'Martinez', 'Calle de la Montaña', 'Málaga', 'Andalucía', 2200, '09:00:00', '17:00:00', '12345683234', 'Carniceria'),
-('12345684G', 'Javier', 'Gonzalez', 'Calle del Cielo', 'Bilbao', 'País Vasco', 2400, '09:00:00', '17:00:00', '12345684234', 'Cajero'),
-('12345685H', 'Cristina', 'Ruiz', 'Calle de la Tierra', 'Murcia', 'Murcia', 2600, '09:00:00', '17:00:00', '12345685234', 'Charcuteria'),
-('12345686I', 'Raquel', 'Díaz', 'Calle del Sol', 'Barcelona', 'Cataluña', 2800, '09:00:00', '17:00:00', '12345686234', 'Logistica'),
-('12345687J', 'Irene', 'Rodriguez', 'Calle de la Luna', 'Madrid', 'Madrid', 3000, '09:00:00', '17:00:00', '12345687234', 'Gerente');
+
+INSERT INTO Empleado VALUES
+('87654321A', 'Juan', 'Pérez', 'Calle del Sol', 'Madrid', 'Madrid', 1200, '09:00:00', '17:00:00', '123456781234', 'Cajero'),
+('87654321B', 'Ana', 'García', 'Calle de la Luna', 'Barcelona', 'Cataluña', 1400, '08:00:00', '16:00:00', '123456791234', 'Cajero'),
+('87654321C', 'Pablo', 'Rodríguez', 'Calle del Mar', 'Valencia', 'Valencia', 1600, '09:00:00', '17:00:00', '12345680234', 'Cajero'),
+('87654321D', 'Sandra', 'Lopez', 'Calle de las Estrellas', 'Sevilla', 'Andalucía', 1800, '09:00:00', '17:00:00', '12345681234', 'Cajero'),
+('87654321E', 'Alberto', 'Fernandez', 'Calle del Rio', 'Zaragoza', 'Aragón', 2000, '09:00:00', '17:00:00', '12345682234', 'Charcuteria'),
+('87654321F', 'Laura', 'Martinez', 'Calle de la Montaña', 'Málaga', 'Andalucía', 2200, '09:00:00', '17:00:00', '12345683234', 'Charcuteria'),
+('87654321G', 'Javier', 'Gonzalez', 'Calle del Cielo', 'Bilbao', 'País Vasco', 2400, '09:00:00', '17:00:00', '12345684234', 'Logistica'),
+('87654321H', 'Cristina', 'Ruiz', 'Calle de la Tierra', 'Murcia', 'Murcia', 2600, '09:00:00', '17:00:00', '12345685234', 'Logistica'),
+('87654321I', 'Raquel', 'Díaz', 'Calle del Sol', 'Barcelona', 'Cataluña', 2800, '09:00:00', '17:00:00', '12345686234', 'Logistica'),
+('87654321J', 'Irene', 'Rodriguez', 'Calle de la Luna', 'Madrid', 'Madrid', 3000, '09:00:00', '17:00:00', '12345687234', 'Gerente'),
+('87654321K', 'Manuel', 'Castilla', 'Calle Castro', 'La Laguna', 'Santa Cruz de Tenerife', 3000, '09:00:00', '17:00:00', '12345687234', 'Pescaderia'),
+('87654321L', 'Maria', 'Sanchez', 'Calle Palomar', 'A Coruña', 'Galicia', 3000, '09:00:00', '17:00:00', '43253234534', 'Carniceria');
 
 
--- Insertar datos para los cajeros
--- CREATE TABLE Cajero(
---     DNI_EMP VARCHAR(9) PRIMARY KEY,
---     Caja INT NOT NULL,
---     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE CASCADE
--- );
+
 INSERT INTO Cajero VALUES 
-('12345684G', 1),
-('12345678A', 1);
+('87654321A', 1),
+('87654321B', 2),
+('87654321C', 3),
+('87654321D', 1);
 
--- Insertar datos para los empleados encargados de la charcuteria 
--- CREATE TABLE Charcuteria(
---     DNI_EMP VARCHAR(9) PRIMARY KEY,
---     Cortadora INT NOT NULL,
---     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE CASCADE
--- );
+
+
 INSERT INTO Charcuteria VALUES 
-('12345679B', 1),
-('12345685H', 2);
+('87654321E', 1),
+('87654321F', 2);
 
--- Insertar datos para los empleados encargados de los almacenes
--- CREATE TABLE Logistica(
---     DNI_EMP VARCHAR(9) PRIMARY KEY,
---     Montacargas INT NOT NULL,
---     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE CASCADE
--- );
+
+
 INSERT INTO Logistica VALUES
-('12345680C', 2),
-('12345686I', 3);
+('87654321G', 1),
+('87654321H', 1),
+('87654321I', 4);
 
 
--- Insertar datos para las tiendas
--- CREATE TABLE Tienda(
---     ID_TIE VARCHAR(30) PRIMARY KEY,
---     Calle VARCHAR(30) NOT NULL,
---     Ciudad VARCHAR(30) NOT NULL,
---     Provincia VARCHAR(30) NOT NULL,
---     Superficie FLOAT NOT NULL
--- );
+
 INSERT INTO Tienda VALUES 
 ('T001', 'Calle de la Paz', 'Madrid', 'Madrid', 200),
 ('T002', 'Calle del Sol', 'Barcelona', 'Cataluña', 300),
@@ -117,89 +80,83 @@ INSERT INTO Tienda VALUES
 ('T009', 'Calle de la Pradera', 'Granada', 'Andalucía', 400),
 ('T010', 'Calle del Desierto', 'Tenerife', 'Islas Canarias', 350);
 
--- Insertar datos para la tabla trabaja
--- CREATE TABLE Trabaja(
---     DNI_EMP VARCHAR(9),
---     ID_TIE VARCHAR(30),
---     FechaInicio DATE,
---     FechaFin DATE,
---     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE CASCADE,
---     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE CASCADE,
---     PRIMARY KEY (DNI_EMP, ID_TIE, FechaInicio)
--- );
-INSERT INTO Trabaja VALUES
-('12345678A', 'T001', '2020-01-01', NULL),
-('12345679B', 'T002', '2020-02-01', '2020-07-31'),
-('12345680C', 'T003', '2020-03-01', NULL),
-('12345681D', 'T004', '2020-04-01', '2020-09-30'),
-('12345682E', 'T005', '2020-05-01', '2020-10-31'),
-('12345683F', 'T006', '2020-06-01', '2020-11-30'),
-('12345684G', 'T007', '2020-07-01', NULL),
-('12345685H', 'T008', '2020-08-01', '2021-01-31'),
-('12345686I', 'T004', '2020-09-01', '2020-10-01'),
-('12345686I', 'T009', '2020-10-01', NULL),
-('12345687J', 'T010', '2020-10-01', '2021-03-31'),
-('12345687J', 'T010', '2021-04-29', NULL);
 
--- Insertar datos para los almacenes
--- CREATE TABLE Almacen(
---     ID_ALM VARCHAR(30) PRIMARY KEY,
---     Temperatura FLOAT NOT NULL,
---     Superficie FLOAT NOT NULL,
---     ID_EMP VARCHAR(9),
---     FOREIGN KEY (ID_ALM) REFERENCES Tienda(ID_TIE) ON DELETE CASCADE,
---     FOREIGN KEY (ID_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE SET NULL
--- );
+
+INSERT INTO Trabaja VALUES
+('87654321A', 'T001', '2019-01-01', '2019-02-01'),
+('87654321A', 'T001', '2020-01-01', NULL),
+('87654321B', 'T007', '2019-01-04', '2019-02-27'),
+('87654321B', 'T002', '2020-02-01', '2020-07-31'),
+('87654321C', 'T003', '2020-03-01', NULL),
+('87654321D', 'T004', '2020-04-01', '2020-09-30'),
+('87654321E', 'T001', '2020-05-01', '2020-10-31'),
+('87654321F', 'T002', '2020-06-01', '2020-11-30'),
+('87654321G', 'T001', '2020-07-01', NULL),
+('87654321H', 'T002', '2020-08-01', '2021-01-31'),
+('87654321I', 'T003', '2020-09-01', '2020-10-01'),
+('87654321J', 'T001', '2020-10-01', NULL),
+('87654321K', 'T001', '2020-10-01', '2021-03-31'),
+('87654321L', 'T001', '2021-04-29', NULL);
+
+
+
 INSERT INTO Almacen VALUES
-('T001', 18, 500, NULL),
-('T002', 20, 700, NULL),
-('T003', 22, 400, '12345680C'),
+('T001', 18, 500, '87654321G'),
+('T002', -2, 700, '87654321H'),
+('T003', 0, 400, '87654321I'),
 ('T004', 24, 1000, NULL),
 ('T005', 18, 800, NULL),
 ('T006', 20, 900, NULL),
 ('T007', 22, 700, NULL),
 ('T008', 24, 1200, NULL),
-('T009', 18, 1000, '12345686I'),
+('T009', 18, 1000, NULL),
 ('T010', 20, 1200, NULL);
 
--- Insertar datos para la tabla DisponibilidadTienda
--- CREATE TABLE DisponibilidadTienda(
---     ID_TIE VARCHAR(30),
---     ID_PROD INT,
---     Cantidad INT NOT NULL,
---     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE CASCADE,
---     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
---     PRIMARY KEY (ID_TIE, ID_PROD)
--- );
+
+
 INSERT INTO DisponibilidadTienda VALUES
 ('T001', 1, 7),
 ('T001', 2, 8),
+('T001', 3, 12),
+('T001', 4, 43),
+('T001', 5, 42),
+('T001', 6, 31),
+('T001', 7, 4),
+('T001', 8, 9),
+('T001', 9, 1),
+('T001', 10, 42),
+('T001', 11, 16),
+('T001', 12, 15),
+('T001', 13, 20),
+('T001', 14, 31),
+('T001', 15, 11),
 ('T002', 3, 9),
 ('T002', 4, 10),
-('T002', 5, 6),
-('T003', 2, 5),
-('T004', 1, 3),
+('T002', 5, 12),
+('T002', 8, 32),
+('T002', 9, 5),
+('T002', 10, 14),
+('T002', 11, 19),
+('T002', 12, 20),
+('T003', 14, 9),
+('T003', 12, 10),
+('T003', 7, 6),
+('T003', 1, 7),
+('T003', 3, 4),
+('T004', 1, 1),
 ('T004', 3, 2),
 ('T004', 5, 8),
 ('T005', 4, 1),
 ('T006', 2, 9),
-('T007', 1, 7),
-('T007', 3, 4),
+('T007', 8, 5),
 ('T008', 2, 6),
 ('T008', 4, 3),
 ('T009', 1, 2),
 ('T009', 5, 5),
 ('T010', 3, 8);
 
--- Insertar datos para la tabla DisponibilidadAlmacen
--- CREATE TABLE DisponibilidadAlmacen(
---     ID_ALM VARCHAR(30),
---     ID_PROD INT,
---     Cantidad INT NOT NULL,
---     FOREIGN KEY (ID_ALM) REFERENCES Almacen(ID_ALM) ON DELETE CASCADE,
---     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
---     PRIMARY KEY (ID_ALM, ID_PROD)
--- );
+
+
 INSERT INTO DisponibilidadAlmacen VALUES
 ('T001', 1, 10),
 ('T001', 2, 20),
@@ -212,42 +169,52 @@ INSERT INTO DisponibilidadAlmacen VALUES
 ('T005', 9, 90),
 ('T005', 10, 100);
 
--- Insertar datos para la tabla Compra
+
+
 INSERT INTO Compra VALUES 
+(DEFAULT),
+(DEFAULT),
+(DEFAULT),
+(DEFAULT),
+(DEFAULT),
+(DEFAULT),
+(DEFAULT),
 (DEFAULT),
 (DEFAULT),
 (DEFAULT);
 
--- Insertar datos para la tabla Carrito
--- CREATE TABLE Carrito(
---     ID_COMP INT,
---     ID_PROD INT,
---     Cantidad INT NOT NULL,
---     FOREIGN KEY (ID_PROD) REFERENCES Producto(ID_PROD) ON DELETE CASCADE,
---     PRIMARY KEY (ID_COMP, ID_PROD)
--- );
+
+
 INSERT INTO Carrito VALUES
 (1, 1, 3),
 (1, 2, 2),
 (2, 2, 1),
 (3, 3, 2),
-(3, 1, 1);
+(3, 1, 1),
+(4, 5, 3),
+(5, 4, 6),
+(5, 5, 4),
+(5, 10, 10),
+(5, 14, 2),
+(5, 11, 3),
+(6, 8, 10),
+(7, 8, 4),
+(8, 3, 3),
+(9, 14, 2),
+(9, 12, 4),
+(9, 7, 1),
+(10, 1, 1);
 
--- Insertar datos para la tabla Transaccion
--- CREATE TABLE Transaccion(
---     ID_TRANS SERIAL PRIMARY KEY,
---     DNI_CLI VARCHAR(9),
---     DNI_EMP VARCHAR(9),
---     ID_TIE VARCHAR(30),
---     ID_COMP INT NOT NULL,
---     Importe FLOAT NOT NULL,
---     Fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
---     FOREIGN KEY (DNI_CLI) REFERENCES Cliente(DNI_CLI) ON DELETE SET NULL,
---     FOREIGN KEY (DNI_EMP) REFERENCES Empleado(DNI_EMP) ON DELETE SET NULL,
---     FOREIGN KEY (ID_TIE) REFERENCES Tienda(ID_TIE) ON DELETE SET NULL,
---     FOREIGN KEY (ID_COMP) REFERENCES Compra(ID_COMP) ON DELETE CASCADE
--- );
+
+
 INSERT INTO Transaccion VALUES 
-(DEFAULT, '12345678A', '12345678A', 'T001', 1),
-(DEFAULT, '87654321B', '12345678A', 'T001', 2),
-(DEFAULT, '11111111C', '12345684G', 'T007', 3);
+(DEFAULT, '12345678A', '87654321A', 'T001', 1),
+(DEFAULT, '12345678B', '87654321A', 'T001', 2),
+(DEFAULT, '12345678F', '87654321C', 'T003', 3),
+(DEFAULT, '12345678D', '87654321D', 'T004', 4),
+(DEFAULT, '12345678F', '87654321A', 'T001', 5),
+(DEFAULT, '12345678C', '87654321B', 'T002', 6),
+(DEFAULT, '12345678G', '87654321A', 'T001', 7),
+(DEFAULT, '12345678H', '87654321B', 'T002', 8),
+(DEFAULT, '12345678F', '87654321C', 'T003', 9),
+(DEFAULT, '12345678D', '87654321D', 'T004', 10);
