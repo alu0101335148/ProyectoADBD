@@ -181,6 +181,7 @@ ADD CONSTRAINT SuperficiePositiva CHECK (Superficie > 0);
 
 --Inserción de disparadores
 
+-- El supervisor debe haber trabajado alguna vez en la tienda.
 CREATE OR REPLACE FUNCTION check_supervisa()
 RETURNS TRIGGER AS $$
 BEGIN
