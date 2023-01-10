@@ -124,7 +124,7 @@ def insert_products(new_product: ProductoInsert):
             new_product.precio, 
             new_product.descripcion, 
             new_product.categoria, 
-            new_product.fecha_caducidad,
+            new_product.fechacaducidad,
         ]
         cur.execute(statement, elements)
         conn.commit()
@@ -176,8 +176,8 @@ def update_products(product_id: int, updated_product: ProductoUpdate):
             product[4] = updated_product.descripcion
         if updated_product.categoria is not None:
             product[5] = updated_product.categoria
-        if updated_product.fecha_caducidad is not None:
-            product[6] = updated_product.fecha_caducidad
+        if updated_product.fechacaducidad is not None:
+            product[6] = updated_product.fechacaducidad
         
         # update the product
         statement = """

@@ -89,8 +89,12 @@ Como se nos estipula en el supuesto teórico, vamos a tener que almacenar cierta
 información de los empleados, de ahí que creemos dicha entidad, no obstante 
 como se nos menciona que dependiendo del rol de estos, se almacenará la 
 herramienta que tengan asignada, que no siempre existirá, se optó por hacer una 
-implementación de herencia, guardando en diferentes tablas simplemente dicha 
-información.
+implementación jerárquica de herencia, guardando en diferentes tablas simplemente
+dicha información.
+
+Otro aspecto importante es la utilización de una relación de exclusividad entre
+supervisa y trabaja, puesto que un supervisor de un almacén debe de haber
+trabajado al menos en una ocasión en dicha tienda.
 
 Por otro lado también vamos a tener que guardar un registro de las 
 destinaciones de cada empleado y como debemos tener una entidad tienda para 
@@ -104,7 +108,7 @@ logística, debido a que necesitamos que los almacenes tengan un supervisor.
 
 ### Gestión de stock
 
-![Almacen](img/Almacen.png)
+![Almacen](./img/Almacen.png)
 
 Para la gestión de los productos en cada tienda, partimos de 3 entidades 
 básicas, la tienda, el producto, y el almacén. Estas entidades optamos por 
@@ -150,6 +154,23 @@ relacionarse con la entidad `Producto`, para poder obtener su precio.
 
 ![Modelo relacional](./img/ModeloRelacional.png)
 
+### Triggers
+
+- Revisar que el supervisor del almacén sea un empleado de logística y ya haya 
+  trabajado en la tienda con anterioridad 
+  
+- Calcular automáticamente el importe de una transacción, con respecto al
+  carrito
+
+- Revisar que al intentar comprar un producto, esté en la tienda y haya 
+  suficiente
+
+- Revisar que el empleado a cargo de la transacción sea un cajero y trabaje en 
+  esa tienda
+
+- Acrtualizar el stock disponible de una tienda depués de una compra
+
+
 ## Grafo relacional
 
 ![Grafo relacional](./img/ERDBeaver.png)
@@ -160,7 +181,7 @@ relacionarse con la entidad `Producto`, para poder obtener su precio.
   superficie de un edificio, como el importe de una transacción deben ser 
   positivos.
 
-- El descuento de un cliente se ubica en el intervalo 0-25%
+- El descuento de un cliente se ubica en el intervalo 0 y 25€
 
 - El identificador de una máquina no puede ser negativo.
 
@@ -215,27 +236,21 @@ ORDER BY valor DESC;
 (10 rows)
 ```
 
-Añadimos 2 unidades del producto 4 y 1 unidad del producto 2 a la tienda T007.
+Añadimos 2 unidades del producto 4 y 1 unidad del producto 2 a la tienda "T001".
 ```sql
 INSERT INTO DisponibilidadTienda VALUES
-('T007', 4, 2),
-('T007', 2, 1);
-```
-
-```
- id_tie | id_prod | cantidad 
---------+---------+----------
- T007   |       4 |        2
- T007   |       2 |        1
-(2 rows)
+('T001', 4, 2),
+('T001', 2, 1);
 ```
 
 Hacemos una compra (productos 2 y 4) superior a 100€.
-```sql
-SELECT Precio FROM Producto WHERE ID_PROD IN (1, 4);
 ```
-
-
+ id_prod | precio 
+---------+--------
+       2 |  24.99
+       4 |  89.99
+(2 rows)
+```
 
 ```sql
 INSERT INTO Compra VALUES (2000);
@@ -243,14 +258,38 @@ INSERT INTO Compra VALUES (2000);
 INSERT INTO Carrito VALUES
 (2000, 4, 1),
 (2000, 2, 1);
+```
 
+```
+ id_comp | id_prod | cantidad 
+---------+---------+----------
+    2000 |       4 |        1
+    2000 |       2 |        1
+(2 rows)
+```
+
+```sql
 INSERT INTO Transaccion
 VALUES (DEFAULT, '12345678A', '87654321A', 'T001', 2000);
+```
+
+```
+ id_trans |  dni_cli  |  dni_emp  | id_tie | id_comp |      importe       |           fecha            
+----------+-----------+-----------+--------+---------+--------------------+----------------------------
+       29 | 12345678A | 87654321A | T001   |    2000 | 114.97999999999999 | 2023-01-10 19:10:22.245297
+(1 row)
 ```
 
 El cliente ya dispone de un descuento de 10€.
 ```sql
 SELECT Descuento FROM Cliente WHERE DNI_CLI = '12345678A';
+```
+
+```
+ descuento 
+-----------
+        10
+(1 row)
 ```
 
 Veamos si en la siguiente compra se aplica el descuento.
@@ -265,4 +304,110 @@ VALUES (5050, '12345678A', '87654321A', 'T001', 3030);
 SELECT Importe FROM Transaccion WHERE ID_TRANS = 5050;
 ```
 
-Por otra parte,
+```
+ importe 
+---------
+   79.99
+(1 row)
+```
+
+Por otra parte, disponemos de un script para comprobar el correcto funcionamiento
+de algunos disparadores. Probamos con algunos casos erróneos.
+
+```sql
+-- Consultas que revisan el correcto funcionamiento de los triggers, las restricciones
+
+
+-- Cambiar el supervisor de la tienda T001.
+-- Se espera un error, el empleado nunca ha trabajado allí.
+UPDATE Almacen
+SET DNI_SUPER = '87654321J'
+WHERE ID_ALM = 'T001';
+
+-- check_cajero: 
+INSERT INTO Compra VALUES 
+(5000),
+(5001),
+(5002);
+
+INSERT INTO Carrito VALUES
+(5000, 1, 3),
+(5000, 2, 2),
+(5001, 3, 1),
+(5002, 4, 2),
+(5002, 1, 1000);
+
+-- trabaja en T001, pero no es cajero -> error 
+INSERT INTO Transaccion VALUES 
+(DEFAULT, '12345678A', '87654321E', 'T001', 5000);
+
+-- cajero de otra tienda -> error
+INSERT INTO Transaccion VALUES
+(DEFAULT, '12345678A', '87654321A', 'T002', 5001);
+
+
+-- check producto:
+-- producto inexistente en una tienda o con stock insuficiente -> error
+INSERT INTO Transaccion VALUES
+(DEFAULT, '12345678A', '87654321A', 'T001', 5002);
+```
+
+```
+supermercado=# \i check.sql 
+psql:check.sql:8: ERROR:  El empleado 87654321J no ha trabajado nunca en la tienda T001
+CONTEXT:  PL/pgSQL function check_supervisa() line 8 at RAISE
+psql:check.sql:14: ERROR:  duplicate key value violates unique constraint "compra_pkey"
+DETAIL:  Key (id_comp)=(5000) already exists.
+psql:check.sql:21: ERROR:  duplicate key value violates unique constraint "carrito_pkey"
+DETAIL:  Key (id_comp, id_prod)=(5000, 1) already exists.
+psql:check.sql:25: ERROR:  El empleado 87654321E no es cajero en la tienda T001
+CONTEXT:  PL/pgSQL function check_cajero() line 7 at RAISE
+psql:check.sql:29: ERROR:  El empleado 87654321A no es cajero en la tienda T002
+CONTEXT:  PL/pgSQL function check_cajero() line 7 at RAISE
+psql:check.sql:35: ERROR:  No hay stock suficiente de alguno de los productos de la compra 5002
+CONTEXT:  PL/pgSQL function check_producto() line 12 at RAISE
+```
+
+## REST API
+
+Para diseñar el REST API, hemos optado por el framework [FastAPI](https://fastapi.tiangolo.com/)
+para *Python*. Ofrece una serie de ventajas, entre ellas:
+
+- Anotaciones de tipos, similar a otros lenguajes como `Typescript`.
+- Gracias a lo anterior: validación automática del cuerpo de la petición.
+- Conversión de las respuestas a formato *json*.
+- Documentación interactiva automática.
+
+Para instalar las dependencias en un entorno virtual, podemos ejecutar los siguientes
+comandos:
+```bash
+cd ProyectoADBD/
+
+python -m venv venv
+
+source ./venv/bin/activate
+
+pip install -r requirements.txt
+```
+
+Pruebe a usar `python3` si obtiene algún error.
+Este proyecto ha sido desarrollado con Python `3.8`.
+
+Para ejecutar el servidor, utilice la siguiente orden. Si ha seguido los pasos,
+debería estar ubicado en la raíz del proyecto. Puede cambiar el *host* y el puerto
+por defecto, si así lo desea.
+
+```bash
+uvicorn api.main:app
+
+# If you want to specify host address and port number.
+uvicorn api.main:app --host 127.0.0.1 --port 8000
+```
+
+Visite la documentación interactiva en http://127.0.0.1:8000/docs para conocer
+más sobre las funcionalidades ofrecidas. Puede probar las distintas operaciones
+**CRUD**, categorizadas por el método *http* (*GET*, *POST*, *PUT*, *DELETE*),
+haciendo click en cada *endpoint*. Haga click sobre *Try it out*, eche un vistazo
+a la respuesta recibida. También puede copiar el comando *curl* sugerido en su
+terminal, si así lo prefiere. Para las operaciones *GET*, se documenta el *json schema*
+de la respuesta, al igual que para el cuerpo de las peticiones *POST*.
