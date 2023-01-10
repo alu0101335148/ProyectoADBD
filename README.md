@@ -356,10 +356,6 @@ INSERT INTO Transaccion VALUES
 supermercado=# \i check.sql 
 psql:check.sql:8: ERROR:  El empleado 87654321J no ha trabajado nunca en la tienda T001
 CONTEXT:  PL/pgSQL function check_supervisa() line 8 at RAISE
-psql:check.sql:14: ERROR:  duplicate key value violates unique constraint "compra_pkey"
-DETAIL:  Key (id_comp)=(5000) already exists.
-psql:check.sql:21: ERROR:  duplicate key value violates unique constraint "carrito_pkey"
-DETAIL:  Key (id_comp, id_prod)=(5000, 1) already exists.
 psql:check.sql:25: ERROR:  El empleado 87654321E no es cajero en la tienda T001
 CONTEXT:  PL/pgSQL function check_cajero() line 7 at RAISE
 psql:check.sql:29: ERROR:  El empleado 87654321A no es cajero en la tienda T002
@@ -373,10 +369,10 @@ CONTEXT:  PL/pgSQL function check_producto() line 12 at RAISE
 Para diseñar el REST API, hemos optado por el framework [FastAPI](https://fastapi.tiangolo.com/)
 para *Python*. Ofrece una serie de ventajas, entre ellas:
 
-- Anotaciones de tipos, similar a otros lenguajes como `Typescript`.
+- Anotaciones de tipos para: clases, variables, parámetros y retorno de funciones, etc.
 - Gracias a lo anterior: validación automática del cuerpo de la petición.
 - Conversión de las respuestas a formato *json*.
-- Documentación interactiva automática.
+- Generación de documentación interactiva.
 
 Para instalar las dependencias en un entorno virtual, podemos ejecutar los siguientes
 comandos:
@@ -390,8 +386,17 @@ source ./venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Pruebe a usar `python3` si obtiene algún error.
-Este proyecto ha sido desarrollado con Python `3.8`.
+Pruebe a usar `python3` si obtiene algún error. Este proyecto ha sido desarrollado
+con Python `3.8`, en un entorno *Linux*.
+
+Coloque las credenciales de su base de datos en un fichero *.env*, ubicado en la
+raíz del proyecto. Por ejemplo:
+
+```bash
+DB_NAME="supermercado"
+DB_USER="usuario"
+DB_PASSWORD="clave"
+```
 
 Para ejecutar el servidor, utilice la siguiente orden. Si ha seguido los pasos,
 debería estar ubicado en la raíz del proyecto. Puede cambiar el *host* y el puerto
@@ -407,7 +412,22 @@ uvicorn api.main:app --host 127.0.0.1 --port 8000
 Visite la documentación interactiva en http://127.0.0.1:8000/docs para conocer
 más sobre las funcionalidades ofrecidas. Puede probar las distintas operaciones
 **CRUD**, categorizadas por el método *http* (*GET*, *POST*, *PUT*, *DELETE*),
-haciendo click en cada *endpoint*. Haga click sobre *Try it out*, eche un vistazo
-a la respuesta recibida. También puede copiar el comando *curl* sugerido en su
-terminal, si así lo prefiere. Para las operaciones *GET*, se documenta el *json schema*
-de la respuesta, al igual que para el cuerpo de las peticiones *POST*.
+haciendo click en cada *endpoint*.
+
+Pruebe con una operación *GET*, haga click sobre *Try it out*, luego *execute*,
+eche un vistazo a la respuesta recibida. También puede copiar el comando *curl*
+sugerido en su terminal, si así lo prefiere.
+
+Para las operaciones *GET*, se documenta el *json schema* de la respuesta, al
+igual que para el cuerpo de las peticiones *POST*. Puede completar los campos del
+objeto que aparece por defecto.
+
+Respecto a la implementación, se han agrupado las rutas de acuerdo a un criterio
+semántico (productos, clientes, tiendas, etc), las operaciones **CRUD** se
+implementan en un fichero independiente. Finalmente, el fichero principal
+incorpora todas las rutas bajo la misma aplicación.
+
+Para realizar consultas a la base de datos, usamos un conector de *postgresql*
+para *Python*, llamado *psycopg2*.
+Se ha incorporado código para manejar excepciones, que se devuelven al cliente
+como un código de estado y un mensaje de error en formato *json*.
