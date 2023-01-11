@@ -62,7 +62,7 @@ def get_availability(destination: Destino) -> List[Union[DisponibilidadTienda, D
         return stock
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de stock: {e.pgerror}")
+            status_code=500, detail="Error en lectura de stock")
     finally:
         if conn is not None:
             conn.close()
@@ -101,13 +101,14 @@ def get_availability_by_id(destination: Destino, id: str) -> List[Union[Disponib
         raise HTTPException(
             status_code=404, detail=f"{destination.value} {id} desconocido/a")
     except psycopg2.DatabaseError as e:
+        logging.error(f"Error en la base de datos: {e.pgerror}")
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de stock: {e.pgerror}")
+            status_code=500, detail="Error en lectura de stock")
     finally:
         if conn is not None:
             conn.close()
 
-@router.post("/availability/", tags=["availability"])
+@router.post("/availability/", status_code=201, tags=["availability"])
 def create_availability(destination: Destino, availability: Union[DisponibilidadTienda, DisponibilidadAlmacen]):
     conn = None
     try:
@@ -132,8 +133,9 @@ def create_availability(destination: Destino, availability: Union[Disponibilidad
         cur.close()
         return {"Creado correctamente": {"id": id_value}}
     except psycopg2.DatabaseError as e:
+        logging.error(f"Error en la base de datos: {e.pgerror}")
         raise HTTPException(
-            status_code=500, detail=f"Error en creación de stock: {e.pgerror}")
+            status_code=500, detail="Error en creación de stock")
     finally:
         if conn is not None:
             conn.close()
@@ -164,8 +166,9 @@ def update_availability(destination: Destino, id: str, availability: Disponibili
         raise HTTPException(
             status_code=404, detail=f"{destination.value} {id} desconocido/a")
     except psycopg2.DatabaseError as e:
+        logging.error(f"Error en la base de datos: {e.pgerror}")
         raise HTTPException(
-            status_code=500, detail=f"Error en actualización de stock: {e.pgerror}")
+            status_code=500, detail="Error en actualización de stock")
     finally:
         if conn is not None:
             conn.close()
@@ -194,8 +197,9 @@ def delete_availability(destination: Destino, id: str, id_prod: int):
         raise HTTPException(
             status_code=404, detail=f"{destination.value} {id} desconocido/a")
     except psycopg2.DatabaseError as e:
+        logging.error(f"Error en la base de datos: {e.pgerror}")
         raise HTTPException(
-            status_code=500, detail=f"Error en eliminación de stock: {e.pgerror}")
+            status_code=500, detail="Error en eliminación de stock")
     finally:
         if conn is not None:
             conn.close()

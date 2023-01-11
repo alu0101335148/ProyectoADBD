@@ -54,7 +54,7 @@ def get_stores() -> List[Tienda]:
         return stores
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de tiendas: {e.pgerror}")
+            status_code=500, detail="Error en lectura de tiendas")
     finally:
         if conn is not None:
             conn.close()    
@@ -86,12 +86,12 @@ def get_store(store_id: str) -> Tienda:
             status_code=404, detail=f"Tienda {store_id} desconocida")
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de tiendas: {e.pgerror}")
+            status_code=500, detail="Error en lectura de tiendas")
     finally:
         if conn is not None:
             conn.close()
 
-@router.post("/stores/", tags=["stores"])
+@router.post("/stores/", status_code=201, tags=["stores"])
 def create_stores(new_store: Tienda):
     conn = None
     try:
@@ -115,7 +115,7 @@ def create_stores(new_store: Tienda):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la inserción de tiendas: {e.pgerror}"
+            detail="Error en la inserción de tiendas"
         )
     finally:
         if conn is not None:
@@ -168,7 +168,7 @@ def update_stores(store_id: str, updated_store: TiendaUpdate):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la actualización de tiendas: {e.pgerror}"
+            detail="Error en la actualización de tiendas"
         )
     finally:
         if conn is not None:
@@ -191,7 +191,7 @@ def delete_stores(store_id: str):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la eliminación de tiendas: {e.pgerror}"
+            detail="Error en la eliminación de tiendas"
         )
     finally:
         if conn is not None:

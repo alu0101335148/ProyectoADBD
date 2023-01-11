@@ -61,7 +61,7 @@ def get_clients() -> List[Cliente]:
         return clients
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de clientes: {e.pgerror}")
+            status_code=500, detail="Error en lectura de clientes")
     finally:
         if conn is not None:
             conn.close()    
@@ -93,12 +93,12 @@ def get_client(client_DNI: str) -> Cliente:
             status_code=404, detail=f"Cliente {client_DNI} desconocido")
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de clientes: {e.pgerror}")
+            status_code=500, detail="Error en lectura de clientes")
     finally:
         if conn is not None:
             conn.close()
 
-@router.post("/clients/", tags=["clients"])
+@router.post("/clients/", status_code=201, tags=["clients"])
 def insert_clients(new_client: Cliente):
     conn = None
     try:
@@ -125,7 +125,7 @@ def insert_clients(new_client: Cliente):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la inserción de clientes: {e.pgerror}"
+            detail="Error en la inserción de clientes"
         )
     finally:
         if conn is not None:
@@ -186,7 +186,7 @@ def update_clients(client_DNI: str, updated_client: ClienteUpdate):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la actualización de clientes: {e.pgerror}"
+            detail="Error en la actualización de clientes"
         )
     finally:
         if conn is not None:
@@ -209,7 +209,7 @@ def delete_clients(client_DNI: str):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la eliminación de clientes: {e.pgerror}"
+            detail="Error en la eliminación de clientes"
         )
     finally:
         if conn is not None:

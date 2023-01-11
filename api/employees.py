@@ -94,7 +94,7 @@ def get_employees() -> List[Empleado]:
         return employees
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de empleados: {e.pgerror}")
+            status_code=500, detail="Error en lectura de empleados")
     finally:
         if conn is not None:
             conn.close()
@@ -142,12 +142,12 @@ def get_employee(dni_emp: str) -> Empleado:
             status_code=404, detail=f"Empleado/a {dni_emp} desconocido/a")
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de empleados: {e.pgerror}")
+            status_code=500, detail="Error en lectura de empleados")
     finally:
         if conn is not None:
             conn.close()
 
-@router.post("/employees/", tags=["employees"])
+@router.post("/employees/", status_code=201, tags=["employees"])
 def create_employee(employee: Empleado):
     conn = None
     try:
@@ -187,7 +187,7 @@ def create_employee(employee: Empleado):
         return {"Creado correctamente": employee.dict()}
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en creación de empleado/a: {e.pgerror}")
+            status_code=500, detail="Error en creación de empleado/a")
     finally:
         if conn is not None:
             conn.close()
@@ -278,7 +278,7 @@ def update_employee(dni_emp: str, employee: EmpleadoUpdate):
             status_code=404, detail=f"Empleado/a {dni_emp} desconocido/a")
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en actualización de empleado/a: {e.pgerror}")
+            status_code=500, detail="Error en actualización de empleado/a")
     finally:
         if conn is not None:
             conn.close()
@@ -316,7 +316,7 @@ def delete_employee(dni_emp: str):
         return {"Borrado correctamente": dni_emp}
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en borrado de empleado/a: {e.pgerror}")
+            status_code=500, detail="Error en borrado de empleado/a")
     finally:
         if conn is not None:
             conn.close()

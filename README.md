@@ -150,32 +150,7 @@ Finalmente, la entidad `Carrito`, contiene los (posiblemente múltiples) product
 de una compra, así como las cantidades adquiridas para cada uno. Es necesario
 relacionarse con la entidad `Producto`, para poder obtener su precio.
 
-## Modelo relacional
-
-![Modelo relacional](./img/ModeloRelacional.png)
-
-### Triggers
-
-- Revisar que el supervisor del almacén sea un empleado de logística y ya haya 
-  trabajado en la tienda con anterioridad 
-  
-- Calcular automáticamente el importe de una transacción, con respecto al
-  carrito
-
-- Revisar que al intentar comprar un producto, esté en la tienda y haya 
-  suficiente
-
-- Revisar que el empleado a cargo de la transacción sea un cajero y trabaje en 
-  esa tienda
-
-- Acrtualizar el stock disponible de una tienda depués de una compra
-
-
-## Grafo relacional
-
-![Grafo relacional](./img/ERDBeaver.png)
-
-## Restricciones semánticas
+### Restricciones semánticas
 
 - Tanto el precio de un producto, la cantidad de producto disponible, la 
   superficie de un edificio, como el importe de una transacción deben ser 
@@ -209,6 +184,30 @@ relacionarse con la entidad `Producto`, para poder obtener su precio.
 - En una transacción, debe atendernos un empleado de caja, que trabaje en dicha 
   tienda.
 
+## Modelo relacional
+
+![Modelo relacional](./img/ModeloRelacional.png)
+
+### Triggers
+
+- Revisar que el supervisor del almacén sea un empleado de logística y ya haya 
+  trabajado en la tienda con anterioridad 
+  
+- Calcular automáticamente el importe de una transacción, con respecto al
+  carrito
+
+- Revisar que al intentar comprar un producto, esté en la tienda y haya 
+  suficiente
+
+- Revisar que el empleado a cargo de la transacción sea un cajero y trabaje en 
+  esa tienda
+
+- Acrtualizar el stock disponible de una tienda depués de una compra
+
+
+## Grafo relacional
+
+![Grafo relacional](./img/ERDBeaver.png)
 
 ## Consultas de prueba
 

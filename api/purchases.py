@@ -71,7 +71,7 @@ def get_purchases() -> List[TransaccionCompra]:
         return purchases
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de compras: {e.pgerror}")
+            status_code=500, detail="Error en lectura de compras")
     finally:
         if conn is not None:
             conn.close()
@@ -110,7 +110,7 @@ def get_purchases_by_store(id_tie: str) -> List[TransaccionCompra]:
         return purchases
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de compras: {e.pgerror}")
+            status_code=500, detail="Error en lectura de compras")
     finally:
         if conn is not None:
             conn.close()
@@ -149,12 +149,12 @@ def get_purchases_by_client(dni_cli: str) -> List[TransaccionCompra]:
         return purchases
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de compras: {e.pgerror}")
+            status_code=500, detail="Error en lectura de compras")
     finally:
         if conn is not None:
             conn.close()
 
-@router.post("/purchases/", tags=["purchases"])
+@router.post("/purchases/", status_code=201, tags=["purchases"])
 def insert_purchase(purchase: TransaccionCompraInsert):
     conn = None
     try:
@@ -188,7 +188,7 @@ def insert_purchase(purchase: TransaccionCompraInsert):
         return {"Insertado correctamente": {"id_comp": id_comp}}
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en inserción de compra: {e.pgerror}")
+            status_code=500, detail="Error en inserción de compra")
     except ValueError:
         raise HTTPException(
             status_code=400, detail=f"Carrito vacío")

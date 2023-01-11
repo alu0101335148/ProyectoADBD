@@ -52,7 +52,7 @@ def get_warehouses() -> List[Almacen]:
         return warehouse
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de almacenes: {e.pgerror}")
+            status_code=500, detail="Error en lectura de almacenes")
     finally:
         if conn is not None:
             conn.close()
@@ -84,12 +84,12 @@ def get_warehouse(warehouse_id: str) -> Almacen:
             status_code=404, detail=f"Almacen {warehouse_id} desconocido")
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de almacenes: {e.pgerror}")
+            status_code=500, detail="Error en lectura de almacenes")
     finally:
         if conn is not None:
             conn.close()
 
-@router.post("/warehouse/", tags=["warehouse"])
+@router.post("/warehouse/", status_code=201, tags=["warehouse"])
 def create_warehouse(new_warehouse: Almacen):
     conn = None
     try:
@@ -112,7 +112,7 @@ def create_warehouse(new_warehouse: Almacen):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la inserción de almacenes: {e.pgerror}"
+            detail="Error en la inserción de almacenes"
         )
     finally:
         if conn is not None:
@@ -163,7 +163,7 @@ def update_warehouse(warehouse_id: str, updated_warehouse: AlmacenUpdate):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500,
-            detail=f"Error en la actualización de almacenes: {e.pgerror}"
+            detail="Error en la actualización de almacenes"
         )
     finally:
         if conn is not None:
@@ -186,7 +186,7 @@ def delete_warehouse(warehouse_id: str):
     except psycopg2.DatabaseError as e:
         raise HTTPException(
             status_code=500, 
-            detail=f"Error en la eliminación de almacenes: {e.pgerror}"
+            detail="Error en la eliminación de almacenes"
         )
     finally:
         if conn is not None:

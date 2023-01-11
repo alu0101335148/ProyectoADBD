@@ -47,7 +47,7 @@ def get_works() -> List[Trabaja]:
         return works
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de trabajos: {e.pgerror}")
+            status_code=500, detail="Error en lectura de trabajos")
     finally:
         if conn is not None:
             conn.close()
@@ -81,12 +81,12 @@ def get_works_by_employee(dni_emp: str) -> List[Trabaja]:
             status_code=404, detail=f"Trabajo de {dni_emp} desconocida")
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en lectura de trabajos: {e.pgerror}")
+            status_code=500, detail="Error en lectura de trabajos")
     finally:
         if conn is not None:
             conn.close()
 
-@router.post("/works/", tags=["works"])
+@router.post("/works/", status_code=201, tags=["works"])
 def create_work(work: Trabaja):
     conn = None
     try:
@@ -102,7 +102,7 @@ def create_work(work: Trabaja):
         return {"Creado correctamente": work.dict()}
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en creación de trabajo: {e.pgerror}")
+            status_code=500, detail="Error en creación de trabajo")
     finally:
         if conn is not None:
             conn.close()
@@ -124,7 +124,7 @@ def update_work(dni_emp: str):
         return {"Actualizado correctamente": dni_emp}
     except psycopg2.DatabaseError as e:
         raise HTTPException(
-            status_code=500, detail=f"Error en actualización de trabajo: {e.pgerror}")
+            status_code=500, detail="Error en actualización de trabajo")
     finally:
         if conn is not None:
             conn.close()    
