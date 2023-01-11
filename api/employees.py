@@ -20,7 +20,7 @@ def get_db_connection():
 
 router = APIRouter()
 
-class Puesto(Enum):
+class Puesto(str, Enum):
     CAJERO = "Cajero"
     CHARCUTERIA = "Charcuteria"
     LOGISTICA = "Logistica"

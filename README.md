@@ -213,22 +213,48 @@ El modelo relacional que se obtiene a partir del modelo E-R es el siguiente:
 En él se ve como hemos tomado diversas decisiones de diseño, aunque cada entidad
 se convierte en una tabla, también hemos creado tablas adicionales desde 
 relaciones, como puede ser el caso de `Trabaja`, `DisponibilidadTienda` y 
-`DisponibilidadAlmacen`. De esta forma estas tablas son las encargadas de 
-representar dicha relación, además de almacenar los atributos de sus relaciones, 
-como puede ser la cantidad, en el caso de `DisponibilidadAlmacen`.
+`DisponibilidadAlmacen`, cuyas cardinalidades son `N:M`. De esta forma estas tablas
+son las encargadas de representar dicha relación, además de almacenar los atributos
+de sus relaciones, como puede ser la cantidad, en el caso de `DisponibilidadAlmacen`.
 
 Por otro lado la relación de herencia entre empleado y los diferentes tipos de 
 empleados en base al rol, la resolvimos al agregar el atributo rol a la tabla 
 empleado y tener tablas para cada uno de los roles que empleen herramientas, 
 relacionados por el DNI con la tabla empleado.
 
+De cara a la elección de claves primarias, cabe resaltar el hecho de mencionar 
+que la tabla trabaja cuenta con una clave primaria compuesta, formada por las 
+columnas DNI_EMP, ID_TIE y FECHA_INICIO, ya que en la misma tabla se pueden 
+encontrar dos tuplas con el mismo DNI_EMP y ID_TIE, pero con fechas de inicio 
+diferentes, por lo que no se puede usar como clave primaria, de esta forma 
+podemos tener un empleado que ha trabajado en la misma tienda en instantes 
+diferentes de tiempo. De igual forma en la tabla trabaja también tenemos una 
+doble clave primaria, formada por ID_COMP y ID_PROD, permitiendo que para una 
+misma compra existan diversos productos.
+
 ## Grafo relacional
+
+Aqui se puede ver el grafo relacional que se obtiene a partir de la base de 
+datos desarrollada en la herramienta `DBeaver`.
 
 ![Grafo relacional](./img/ERDBeaver.png)
 
-## ¿Implementación en Postgresql?
+## Implementación en Postgresql
 
-Puede encontarla en el script `init_db.sql`
+Primero asegúrese de crear la base de datos en el sistema gestor:
+```sql
+CREATE DATABASE supermercado;
+```
+
+Luego ejecute el script `init_db.sql`, ubicado en el directorio `src/`.
+Allí se ecuentra la definición de todas y cada una de las tablas implicadas,
+así como la definición de los disparadores y las restricciones oportunas.
+```bash
+sudo su postgres
+psql
+\c supermercado
+\i init_db.sql
+```
 
 ### Triggers
 
@@ -246,7 +272,371 @@ Puede encontarla en el script `init_db.sql`
 
 - Actualizar el stock disponible de una tienda depués de una compra
 
-### Consultas de prueba
+## Carga inicial de datos
+
+Mediante el script correspondiente, insertamos múltiples registros en la base
+de datos, intentando cubrir tantos casos como sea posible.
+
+```bash
+sudo su postgres
+psql
+\c supermercado postgres
+\i data.sql
+```
+
+Este script contiene información de ejemplo, que puede ser utilizada para 
+revisar un funcionamiento básico de la base de datos, insertando diversas filas 
+en cada una de las tablas e incluso disparando algunos triggers como el los que 
+revisan que los empleados que llevan una compra sean cajeros de dicha tienda, 
+el cálculo automático del importe dado un carrito, etc.
+
+NOTA: La visualización de los valores de cada una de las tablas una vez cargada 
+los datos mediante el script se mostrarán en las consultas de ejemplo.
+
+## Consultas de prueba
+
+Una vez hemos realizado una carga de información inicial en la base de datos,
+procedemos a comprobar su correcto funcionamiento, mediante algunas consultas
+de prueba.
+
+### Consultas básicas
+
+#### Tabla Cliente
+
+```sql
+SELECT * FROM cliente;
+```
+
+```
+  dni_cli  | nombre  | apellidos |         correo          | telefono  |  calle  |  ciudad  |  provincia  | descuento 
+-----------+---------+-----------+-------------------------+-----------+---------+----------+-------------+-----------
+ 12345678A | Juan    | Perez     | JuanPerez@gmail.com     | 346404646 | Calle 1 | Ciudad 1 | Provincia 1 |         0
+ 12345678B | Pepe    | Garcia    | PepeGarcia@gmail.com    | 346656766 | Calle 2 | Ciudad 2 | Provincia 2 |         0
+ 12345678C | Maria   | Gonzalez  | MariaGonzalez@gmail.com | 646886861 | Calle 3 | Ciudad 3 | Provincia 3 |         0
+ 12345678D | Luis    | Rodriguez |                         | 122678646 | Calle 4 | Ciudad 4 | Provincia 4 |         0
+ 12345678E | Ana     | Martinez  |                         | 562163336 | Calle 5 | Ciudad 5 | Provincia 5 |         0
+ 12345678G | Laura   | Sanchez   |                         | 969699626 | Calle 7 | Ciudad 7 | Provincia 7 |         0
+ 12345678H | Antonio | Fernandez |                         | 346404646 | Calle 8 | Ciudad 8 | Provincia 8 |         0
+ 12345678F | Jose    | Lopez     |                         | 232362366 | Calle 6 | Ciudad 6 | Provincia 6 |        10
+(8 rows)
+```
+
+#### Tabla Producto
+
+```sql
+SELECT ID_PROD, NOMBRE, MARCA, PRECIO, CATEGORIA, FECHACADUCIDAD
+FROM PRODUCTO;
+```
+
+```
+ id_prod |            nombre            |         marca         | precio |  categoria   | fechacaducidad 
+---------+------------------------------+-----------------------+--------+--------------+----------------
+       1 | Crema hidratante             | Soft Skin S.A.        |  12.99 | Higiene      | 2023-01-31
+       2 | Sábanas de algodón           | Comfy Bedding S.L.    |  24.99 | Textil       | 
+       3 | Bolsa de deporte             | Fit Gear S.A.         |  29.99 | Otros        | 
+       4 | Juego de cuchillos de cocina | Sharp Blades S.L.     |  89.99 | Herramientas | 2023-12-01
+       5 | Aceite de oliva              | Olive Oil S.A.        |   3.99 | Alimentacion | 2023-05-01
+       6 | Limpiador multiusos          | Fresh Home S.L.       |   4.99 | Limpieza     | 
+       7 | Cepillo de dientes eléctrico | Clean Teeth Inc.      |  49.99 | Higiene      | 
+       8 | Toallas de baño              | Absorbent Towels S.A. |   9.99 | Textil       | 
+       9 | Llave inglesa                | Power Tools S.L.      |   9.99 | Herramientas | 
+      10 | Regla metálica               | Precise Measures S.A. |   3.99 | Otros        | 
+      11 | Arroz integral               | Healthy Grains S.L.   |   2.99 | Alimentacion | 2023-09-01
+      12 | Leche desnatada              | Low Fat Dairy S.A.    |   1.99 | Alimentacion | 2023-01-15
+      13 | Jugo de naranja              | Fresh Squeezed S.L.   |   2.49 | Alimentacion | 2023-04-01
+      14 | Galletas integrales          | Whole Wheat S.A.      |   3.99 | Alimentacion | 2023-02-01
+      15 | Cereales integrales          | Whole Grains S.L.     |   4.99 | Alimentacion | 2023-07-01
+(15 rows)
+```
+
+#### Tabla Empleado
+
+```sql
+SELECT DNI_EMP, NOMBRE, CALLE, SALARIO, HORAENTRADA, NUMCUENTA, ROL
+FROM empleado;
+```
+
+```
+  dni_emp  |  nombre   |         calle          | salario | horaentrada |  numcuenta   |     rol     
+-----------+-----------+------------------------+---------+-------------+--------------+-------------
+ 87654321A | Juan      | Calle del Sol          |    1200 | 09:00:00    | 123456781234 | Cajero
+ 87654321B | Ana       | Calle de la Luna       |    1400 | 08:00:00    | 123456791234 | Cajero
+ 87654321C | Pablo     | Calle del Mar          |    1600 | 09:00:00    | 12345680234  | Cajero
+ 87654321D | Sandra    | Calle de las Estrellas |    1800 | 09:00:00    | 12345681234  | Cajero
+ 87654321E | Alberto   | Calle del Rio          |    2000 | 09:00:00    | 12345682234  | Charcuteria
+ 87654321F | Laura     | Calle de la Montaña    |    2200 | 09:00:00    | 12345683234  | Charcuteria
+ 87654321G | Javier    | Calle del Cielo        |    2400 | 09:00:00    | 12345684234  | Logistica
+ 87654321H | Cristina  | Calle de la Tierra     |    2600 | 09:00:00    | 12345685234  | Logistica
+ 87654321I | Raquel    | Calle del Sol          |    2800 | 09:00:00    | 12345686234  | Logistica
+ 87654321J | Irene     | Calle de la Luna       |    3000 | 09:00:00    | 12345687234  | Gerente
+ 87654321K | Manuel    | Calle Castro           |    3000 | 09:00:00    | 12345687234  | Pescaderia
+ 87654321L | Maria     | Calle Palomar          |    3000 | 09:00:00    | 43253234534  | Carniceria
+(12 rows)
+```
+
+#### Tabla Cajero
+
+```sql
+SELECT * FROM CAJERO;
+```
+
+```
+  dni_emp  | caja 
+-----------+------
+ 87654321A |    1
+ 87654321B |    2
+ 87654321C |    3
+ 87654321D |    1
+(4 rows)
+```
+
+#### Tabla Charcuteria
+
+```sql
+SELECT * FROM CHARCUTERIA;
+```
+
+```
+  dni_emp  | cortadora 
+-----------+-----------
+ 87654321E |         1
+ 87654321F |         2
+(2 rows)
+```
+
+#### Tabla Logistica
+
+```sql
+SELECT * FROM LOGISTICA;
+```
+
+```
+  dni_emp  | montacargas 
+-----------+-------------
+ 87654321G |           1
+ 87654321H |           1
+ 87654321I |           4
+(3 rows)
+```
+
+#### Tabla Tienda
+
+```sql
+SELECT * FROM TIENDA;
+```
+
+```
+ id_tie |         calle          |  ciudad   |      provincia       | superficie 
+--------+------------------------+-----------+----------------------+------------
+ T001   | Calle de la Paz        | Madrid    | Madrid               |        200
+ T002   | Calle del Sol          | Barcelona | Cataluña             |        300
+ T003   | Calle de la Luna       | Valencia  | Comunidad Valenciana |        250
+ T004   | Calle de las Estrellas | Sevilla   | Andalucía            |        350
+ T005   | Calle del Mar          | Málaga    | Andalucía            |        400
+ T006   | Calle de la Montaña    | Bilbao    | País Vasco           |        300
+ T007   | Calle del Río          | Zaragoza  | Aragón               |        250
+ T008   | Calle del Bosque       | Mallorca  | Islas Balears        |        350
+ T009   | Calle de la Pradera    | Granada   | Andalucía            |        400
+ T010   | Calle del Desierto     | Tenerife  | Islas Canarias       |        350
+(10 rows)
+```
+
+#### Tabla Almacén
+
+```sql
+SELECT * FROM ALMACEN;
+```
+
+```
+ id_alm | temperatura | superficie | dni_super 
+--------+-------------+------------+-----------
+ T001   |          18 |        500 | 87654321G
+ T002   |          -2 |        700 | 87654321H
+ T003   |           0 |        400 | 87654321I
+ T004   |          24 |       1000 | 
+ T005   |          18 |        800 | 
+ T006   |          20 |        900 | 
+ T007   |          22 |        700 | 
+ T008   |          24 |       1200 | 
+ T009   |          18 |       1000 | 
+ T010   |          20 |       1200 | 
+(10 rows)
+```
+
+#### Tabla Trabaja
+
+```sql
+SELECT * FROM TRABAJA;
+```
+
+```
+  dni_emp  | id_tie | fechainicio |  fechafin  
+-----------+--------+-------------+------------
+ 87654321A | T001   | 2019-01-01  | 2019-02-01
+ 87654321A | T001   | 2020-01-01  | 
+ 87654321B | T007   | 2019-01-04  | 2019-02-27
+ 87654321B | T002   | 2020-02-01  | 2020-07-31
+ 87654321C | T003   | 2020-03-01  | 
+ 87654321D | T004   | 2020-04-01  | 2020-09-30
+ 87654321E | T001   | 2020-05-01  | 2020-10-31
+ 87654321F | T002   | 2020-06-01  | 2020-11-30
+ 87654321G | T001   | 2020-07-01  | 
+ 87654321H | T002   | 2020-08-01  | 2021-01-31
+ 87654321I | T003   | 2020-09-01  | 2020-10-01
+ 87654321J | T001   | 2020-10-01  | 
+ 87654321K | T001   | 2020-10-01  | 2021-03-31
+ 87654321L | T001   | 2021-04-29  | 
+(14 rows)
+```
+
+#### Tabla DisponibilidadTienda
+
+```sql
+SELECT * FROM DISPONIBILIDADTIENDA;
+```
+
+```
+ id_tie | id_prod | cantidad 
+--------+---------+----------
+ T001   |       3 |       12
+ T001   |       6 |       31
+ T001   |       7 |        4
+ T001   |       9 |        1
+ T001   |      12 |       15
+ T001   |      13 |       20
+ T001   |      15 |       11
+ T002   |       4 |       10
+ T002   |       5 |       12
+ T002   |       9 |        5
+ T002   |      10 |       14
+ T002   |      11 |       19
+ T002   |      12 |       20
+ T004   |       3 |        2
+ T005   |       4 |        1
+ T006   |       2 |        9
+ T007   |       8 |        5
+ T008   |       2 |        6
+ T008   |       4 |        3
+ T009   |       1 |        2
+ T009   |       5 |        5
+ T010   |       3 |        8
+ T001   |       1 |        4
+ T001   |       2 |        5
+ T003   |       3 |        2
+ T003   |       1 |        6
+ T004   |       5 |        5
+ T001   |       4 |       37
+ T001   |       5 |       38
+ T001   |      10 |       32
+ T001   |      14 |       29
+ T001   |      11 |       13
+ T002   |       8 |       22
+ T001   |       8 |        5
+ T002   |       3 |        6
+ T003   |      14 |        7
+ T003   |      12 |        6
+ T003   |       7 |        5
+ T004   |       1 |        0
+(39 rows)
+```
+
+#### Tabla DisponibilidadAlmacen
+
+```sql
+SELECT * FROM DisponibilidadAlmacen;
+```
+
+```
+ id_alm | id_prod | cantidad 
+--------+---------+----------
+ T001   |       1 |       10
+ T001   |       2 |       20
+ T002   |       3 |       30
+ T002   |       4 |       40
+ T003   |       5 |       50
+ T003   |       6 |       60
+ T004   |       7 |       70
+ T004   |       8 |       80
+ T005   |       9 |       90
+ T005   |      10 |      100
+(10 rows)
+```
+
+#### Tabla Compra
+
+```sql
+SELECT * FROM COMPRA;
+```
+
+```
+ id_comp 
+---------
+       1
+       2
+       3
+       4
+       5
+       6
+       7
+       8
+       9
+      10
+(10 rows)
+```
+
+#### Tabla Carrito
+
+```SQL
+SELECT * FROM CARRITO;
+```
+
+```
+ id_comp | id_prod | cantidad 
+---------+---------+----------
+       1 |       1 |        3
+       1 |       2 |        2
+       2 |       2 |        1
+       3 |       3 |        2
+       3 |       1 |        1
+       4 |       5 |        3
+       5 |       4 |        6
+       5 |       5 |        4
+       5 |      10 |       10
+       5 |      14 |        2
+       5 |      11 |        3
+       6 |       8 |       10
+       7 |       8 |        4
+       8 |       3 |        3
+       9 |      14 |        2
+       9 |      12 |        4
+       9 |       7 |        1
+      10 |       1 |        1
+(18 rows)
+```
+
+#### Tabla Transaccion
+
+```sql
+SELECT id_trans, dni_cli, dni_emp, id_tie, id_comp, importe FROM transaccion;
+```
+
+```
+ id_trans |  dni_cli  |  dni_emp  | id_tie | id_comp |   importe      
+----------+-----------+-----------+--------+---------+--------------
+        1 | 12345678A | 87654321A | T001   |       1 |       88.95
+        2 | 12345678B | 87654321A | T001   |       2 |       24.99
+        3 | 12345678F | 87654321C | T003   |       3 |       72.97
+        4 | 12345678D | 87654321D | T004   |       4 |       11.97
+        5 | 12345678F | 87654321A | T001   |       5 |      612.75
+        6 | 12345678C | 87654321B | T002   |       6 |       99.90
+        7 | 12345678G | 87654321A | T001   |       7 |       39.96
+        8 | 12345678H | 87654321B | T002   |       8 |       89.97
+        9 | 12345678F | 87654321C | T003   |       9 |       65.93
+       10 | 12345678D | 87654321D | T004   |      10 |       12.99
+(10 rows)
+```
+
+### Otras consultas
 
 Valor total de los productos almacenados por cada tienda.
 ```sql
@@ -466,4 +856,84 @@ incorpora todas las rutas bajo la misma aplicación.
 Para realizar consultas a la base de datos, usamos un conector de *postgresql*
 para *Python*, llamado *psycopg2*.
 Se ha incorporado código para manejar excepciones, que se devuelven al cliente
-como un código de estado y un mensaje de error en formato *json*.
+como un código de estado estándar acorde y un mensaje de error en formato *json*.
+
+### Validación de datos: POST
+
+FastAPI permite definir de antemano el formato del cuerpo de la petición, con
+sus tipos de datos predefinidos. Estas anotaciones se integran perfectamente
+con las declaraciones de clases y funciones (parámetros y retorno).
+
+```python
+class Puesto(Enum):
+    CAJERO = "Cajero"
+    CHARCUTERIA = "Charcuteria"
+    LOGISTICA = "Logistica"
+    GERENTE = "Gerente"
+    PESCADERIA = "Pescaderia"
+    CARNICERIA = "Carniceria"
+
+class Empleado(BaseModel):
+    dni_emp: str
+    nombre: str
+    apellidos: str
+    calle: str
+    ciudad: str
+    provincia: str
+    salario: float
+    horaentrada: time
+    horasalida: time
+    numcuenta: str
+    rol: Puesto
+    herramienta: Union[int, None] = None # Atributo opcional.
+
+# Endpoint handler function.
+@router.post("/employees/", status_code=201)
+def create_employee(employee: Empleado):
+  ...
+```
+
+El framework aprovecha estas definiciones para documentar el *API* y puede
+proporcionar objetos *json* de ejemplo:
+
+IMAGEN EmpleadoPost
+
+Cuando se incumple con las restricciones anteriores, por ejemplo, se incluye un
+salario que no es numérico, FastAPI revisa la petición y devuelve un error
+claro y conciso al respecto
+
+IMAGEN EmpleadoValidError
+
+De la misma forma, si un atributo no es opcional, entonces debe especificarse en
+cada petición, de lo contrario se considera un error.
+
+IMAGEN EmpleadoValidMissing
+
+### Validación de datos: GET
+
+Ocurre algo similar para las respuestas de las peticiones *GET*, FastAPI se
+encarga de convertir los tipos y diccionarios de *Python* al formato *json*.
+
+```python
+class CantidadProducto(BaseModel):
+    id_prod: int
+    cantidad: int
+
+class TransaccionCompra(BaseModel):
+    id_trans: int
+    dni_emp: str
+    dni_cli: str
+    id_tie: str
+    importe: float
+    fecha: datetime
+    carrito: List[CantidadProducto]
+
+@router.get("/purchases/", status_code=200)
+def get_purchases() -> List[TransaccionCompra]:
+  ...
+```
+
+También se documenta en la interfaz interactiva, lo cuál supone una información
+muy valiosa para los desarrolladores que quieran usar el *API*.
+
+IMAGEN GetTransaccion
