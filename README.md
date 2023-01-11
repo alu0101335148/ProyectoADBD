@@ -8,9 +8,13 @@
 
 ## Objetivos
 
-- Almacenar la información de los productos disponibles en la tienda.
+- Almacenar información de las tiendas que tenemos en la empresa (Dirección, identificador, superficie, etc)
 
-- Almacenar la información del personal designado contratado.
+- Almacenar la información de los productos disponibles en las diferentes 
+  tiendas.
+
+- Almacenar la información del personal contratado, designado a distintos 
+  puestos, así como información correspondiente al trabajo designado.
 
 - Contemplar las diferentes categorías de productos de la empresa.
 
@@ -27,7 +31,8 @@
 
 - Aplicación automática de descuentos a ciertos clientes.
 
-- Tener un sistema preventor de inserción de consultas erróneas (precios negativos, saldos por debajo del salario mínimo, etc).
+- Tener un sistema preventor de inserción de consultas erróneas (precios 
+  negativos, saldos por debajo del salario mínimo, etc).
 
 - Desarrollar una interfaz de comunicación tipo REST API, que facilite tanto a 
   los usuarios finales, como a otras aplicaciones y servicios internos de la 
@@ -48,32 +53,34 @@ la categoría ('Alimentacion', 'Limpieza', 'Higiene', 'Textil', 'Herramientas' y
 De igual manera se quiere llevar un control de la contratación de los empleados, 
 guardando su información personal (DNI, nombre, apellidos, dirección, salario, 
 horario de entrada y salida, número de cuenta y rol dentro de la tienda (Cajero, 
-Charcuteria, Logistica, Gerente, Pescaderia, Carniceria), periodo y destinación.
+Charcuteria, Logistica, Gerente, Pescaderia, Carniceria), destino y duración 
+temporal de cada periodo laboral. 
+
 Cabe resaltar que el rol nos servirá para mantener almacenado información de 
 algunos puestos específicos, como las herramientas que usen, para poder llevar 
 un control de las herramientas asignadas a cada uno, como puede ser a los 
 encargados del almacén los montacargas de cada uno.
 
-Cabe resaltar que cada tienda tiene un único almacen, y deberemos poder 
-almacenar la información de la superficie, la temperatura y el empleado que se 
-encarga de este. También tendremos que guardar el identificador de la tienda a 
-la que pertenece cada almacén y el stock de cada producto en cada  almacén, así 
-como tambíen queremos saber la cantidad de cada producto en exposición.
+Otro aspecto a recalcar, es el hecho de que cada tienda tiene un único almacen,
+del cual nos interesa guardar la información de la superficie, la temperatura y 
+el empleado (rol de logística) que se encarga de este. También tendremos que 
+guardar el stock de cada producto en cada almacén, así como también queremos 
+saber la cantidad de cada producto en exposición.
 
 La empresa desea implementar un sistema de fidelización de clientes, por lo que
 queremos almacenar la información de los clientes, siendo esta DNI, nombre, 
-apellido, correo, teléfono, dirección y un descuento que se le aplica a los 
-clientes que realicen compras superiores a 100€ mensuales.
+apellido, correo, teléfono, dirección y un descuento que se le aplica aquellos
+que realicen compras totales por un valor superior a 100€, a nivel mensual.
 
 Por último, la empresa quiere llevar un control de las transacciones que se 
 realizan en cada una de las tiendas, almacenando el identificador del cliente 
-que la ha realizado, el cajero que ha  gestionado la compra, los productos 
+que la ha realizado, el cajero que ha gestionado la compra, los productos 
 comprados, el importe total, un identificador de la compra y la fecha de la 
 misma. Todo esto servirá a su vez para aplicar el sistema de descuento a los 
-clientes que en caso de que realizen compras de más de 100 euros mensuales, se 
-les aplicará un descuento de 10€ en su próxima compra superior a 50€.
+clientes mencionados anteriormente, se les aplicará un descuento de 10€ en su 
+próxima compra superior a 50€.
 
-## Modelo entidad-relación
+## Modelo entidad-relación (E-R)
 
 ![Modelo entidad-relación](./img/DiagramaER.png)
 
@@ -89,36 +96,44 @@ Como se nos estipula en el supuesto teórico, vamos a tener que almacenar cierta
 información de los empleados, de ahí que creemos dicha entidad, no obstante 
 como se nos menciona que dependiendo del rol de estos, se almacenará la 
 herramienta que tengan asignada, que no siempre existirá, se optó por hacer una 
-implementación jerárquica de herencia, guardando en diferentes tablas simplemente
-dicha información.
+implementación jerárquica de herencia, guardando en diferentes tablas 
+simplemente dicha información. La entidad base `Empleado` existe porque pueden 
+haber roles (por ejemplo gerente), que no disponen de herramientas específicas 
+que deban tenerse en cuenta, de esta forma nos aseguramos de almacenar la 
+información general de cada empleado y de forma independiente la específica, 
+como en este caso es, la herramienta asignada.
 
-Otro aspecto importante es la utilización de una relación de exclusividad entre
-supervisa y trabaja, puesto que un supervisor de un almacén debe de haber
-trabajado al menos en una ocasión en dicha tienda.
+Otro aspecto importante es la utilización de una relación de inclusión entre
+supervisa trabaja, puesto que un supervisor de un almacén debe de haber
+trabajado al menos en una ocasión en dicha tienda. Esta relación entre los 
+almacenes, con los empleados de logística tiene cardinalidad 1 a 1, debido a 
+que necesitamos que los almacenes tengan un supervisor y este sea destinado a
+ese rol.
 
-Por otro lado también vamos a tener que guardar un registro de las 
+Por otro lado, también vamos a tener que guardar un registro de las 
 destinaciones de cada empleado y como debemos tener una entidad tienda para 
-almacenar la información de interés de cada una de las tiendas de forma 
-independiente, simplemente los relacionamos mediante una relación de trabaja, 
-que derivará posteriormente en una tabla.
-
-Finalmente se optó por una relación de supervisión entre los almacenes 
-(específicos de cada tienda en una relación de 1 a 1), con los empleados de 
-logística, debido a que necesitamos que los almacenes tengan un supervisor.
+almacenar la información de interés de cada una de las tiendas, simplemente 
+los relacionamos mediante una relación de trabaja. Nótese que un empleado puede
+cambiar su destino laboral de forma libre a lo largo del tiempo, por eso 
+necesitamos que la fecha de inicio sea un atributo discriminante, la fecha de 
+final puede llegar a ser nula, cuando el empleado continúa trabajando allí de 
+forma indefinida. Ambas fechas son atributos propios de la relación, que se
+combinan para determinar el periodo laboral.
 
 ### Gestión de stock
 
 ![Almacen](./img/Almacen.png)
 
 Para la gestión de los productos en cada tienda, partimos de 3 entidades 
-básicas, la tienda, el producto, y el almacén. Estas entidades optamos por 
-unirlas con relaciones de "dispone" y "producto en", de esta forma 
-almacenaremos el stock expuesto en tienda y el stock en el almacén para cada
-una de los supermercados.
+básicas: la tienda, el producto, y el almacén. Estas entidades optamos por 
+unirlas con relaciones de "dispone" y "producto en", con un atributo asociado a
+cada relación que determina la cantidad de cada producto. de esta forma 
+registramos el stock expuesto en tienda y el stock en el almacén para cadauno 
+de los supermercados.
 
-Cabe resaltar que almacén es una entidad débil, debido a que cada almacén está
+Cabe resaltar que "almacén" es una entidad débil, debido a que cada almacén está
 ligado a una tienda en una relación 1 a 1 de pertenencia, por lo que si 
-desaparece la tienda debería desaparecer el almacén.
+desaparece la tienda, debería desaparecer su almacén.
 
 ### Gestión de clientes y transacciones
 
@@ -126,46 +141,51 @@ desaparece la tienda debería desaparecer el almacén.
 
 Con respecto a los clientes, éstos se representan como una entidad propia y se
 recogen diversos atributos. Los clientes pueden recibir descuentos en función
-de su volumen de gasto mensual, por ello dicho atributo debe ser calculado
+de su volumen de gasto mensual, por ello dicho atributo debe calcularse
 posteriormente.
 
 Como se ha comentado al inicio, las transacciones realizadas en las tiendas son
 un aspecto central del negocio y de nuestro diseño. Éstas se representan como una
 relación múltiple, que asocia 4 entidades fundamentales:
 - Cliente, cardinalidad N. Es el cliente que realiza la compra.
-- Empleado (puesto de caja), cardinalidad N. Atiende al cliente.
-- Tienda, cardinalidad N. Lugar dónde se realiza la compra.
+- Empleado (puesto de cajero), cardinalidad N. Atiende al cliente.
+- Tienda, cardinalidad N. Lugar dónde se efectúa la compra.
 - Compra, cardinalidad 1. Representa los productos comprados.
 
-Cabe destacar que el importe monetario total, se calcula automáticamente en base
-al contenido del carrito y los precios de los productos.
+Cabe destacar que el importe monetario total, se calcula automáticamente en 
+base al contenido del carrito y los precios de los productos. Por tanto, cada 
+transacción debe hacer referencia a un conjunto de productos (las compras 
+individuales son poco frecuentes), esto es posible gracias a una entidad 
+auxiliar llamada `Compra`, de lo contrario, no podríamos hacer
+referencia a la entidad `Carrito` a través de una clave ajena en `Transacción`,
+pues el atributo referenciado debe ser una clave primaria (por tanto única por 
+sí misma) en la otra entidad.
 
-Por tanto, cada transacción debe hacer referencia a un conjunto de productos
-(las compras individuales suelen ser poco comunes), esto es posible gracias
-a una entidad auxiliar llamada `Compra`, de lo contrario, no podríamos hacer
-referencia a la entidad `Carrito` a través de una clave ajena, pues el atributo
-referenciado debe ser una clave primaria (por tanto única) en la otra entidad.
-
-Finalmente, la entidad `Carrito`, contiene los (posiblemente múltiples) productos
+Finalmente, la entidad `Carrito` contiene los (posiblemente múltiples) productos
 de una compra, así como las cantidades adquiridas para cada uno. Es necesario
 relacionarse con la entidad `Producto`, para poder obtener su precio.
 
 ### Restricciones semánticas
 
+El modelo E-R y el modelo relacional no son capaces de representar todos los 
+aspectos importantes que el supuesto debe cubrir, por lo que necesitamos 
+especificar las restricciones semánticas oportunas que nos harán falta para 
+garantizar la integridad de los datos. Estas restricciones se expresan más
+adelante en SQL, y se pueden implementar en el SGBD mediante triggers.
+
 - Tanto el precio de un producto, la cantidad de producto disponible, la 
   superficie de un edificio, como el importe de una transacción deben ser 
   positivos.
 
-- El descuento de un cliente se ubica en el intervalo 0 y 25€
+- El descuento de un cliente se ubica en el intervalo 0 y 25€, se calcula y 
+  aplica en base al volumen de compras mensual y al dinero gastado.
 
-- El identificador de una máquina no puede ser negativo.
+- El identificador de una máquina/herramienta no puede ser negativo.
 
-- La fecha de finalización debe ser posterior a la facha de inicio en un 
-  periodo laboral.
+- La fecha de finalización debe ser posterior a la facha de inicio, en un 
+  mismo periodo laboral.
 
 - El salario mínimo en la compañía es 900€.
-
-- Sólo puede haber un almacén por cada tienda.
 
 - Un empleado de logística puede supervisar un almacén, siempre y cuando haya 
   trabajado en esa tienda alguna vez.
@@ -174,7 +194,7 @@ relacionarse con la entidad `Producto`, para poder obtener su precio.
   este último mes.
 
 - El importe de una transacción, se calcula en base al precio y la cantidad de 
-  los productos de la cesta.
+  los productos del carrito.
 
 - Todos los productos de una compra, deben estar disponibles en la tienda con 
   suficiente cantidad.
@@ -186,11 +206,33 @@ relacionarse con la entidad `Producto`, para poder obtener su precio.
 
 ## Modelo relacional
 
+El modelo relacional que se obtiene a partir del modelo E-R es el siguiente:
+
 ![Modelo relacional](./img/ModeloRelacional.png)
+
+En él se ve como hemos tomado diversas decisiones de diseño, aunque cada entidad
+se convierte en una tabla, también hemos creado tablas adicionales desde 
+relaciones, como puede ser el caso de `Trabaja`, `DisponibilidadTienda` y 
+`DisponibilidadAlmacen`. De esta forma estas tablas son las encargadas de 
+representar dicha relación, además de almacenar los atributos de sus relaciones, 
+como puede ser la cantidad, en el caso de `DisponibilidadAlmacen`.
+
+Por otro lado la relación de herencia entre empleado y los diferentes tipos de 
+empleados en base al rol, la resolvimos al agregar el atributo rol a la tabla 
+empleado y tener tablas para cada uno de los roles que empleen herramientas, 
+relacionados por el DNI con la tabla empleado.
+
+## Grafo relacional
+
+![Grafo relacional](./img/ERDBeaver.png)
+
+## ¿Implementación en Postgresql?
+
+Puede encontarla en el script `init_db.sql`
 
 ### Triggers
 
-- Revisar que el supervisor del almacén sea un empleado de logística y ya haya 
+- Revisar que el supervisor del almacén sea un empleado de logística y ya haya
   trabajado en la tienda con anterioridad 
   
 - Calcular automáticamente el importe de una transacción, con respecto al
@@ -202,14 +244,9 @@ relacionarse con la entidad `Producto`, para poder obtener su precio.
 - Revisar que el empleado a cargo de la transacción sea un cajero y trabaje en 
   esa tienda
 
-- Acrtualizar el stock disponible de una tienda depués de una compra
+- Actualizar el stock disponible de una tienda depués de una compra
 
-
-## Grafo relacional
-
-![Grafo relacional](./img/ERDBeaver.png)
-
-## Consultas de prueba
+### Consultas de prueba
 
 Valor total de los productos almacenados por cada tienda.
 ```sql
